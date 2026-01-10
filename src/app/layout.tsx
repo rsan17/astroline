@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Philosopher, Nunito } from 'next/font/google';
 import './globals.css';
+import PreLoader from '@/components/ui/PreLoader';
 
 const philosopher = Philosopher({
   subsets: ['latin', 'cyrillic'],
@@ -102,6 +103,25 @@ export default function RootLayout({
   return (
     <html lang="uk" className={`${philosopher.variable} ${nunito.variable}`}>
       <body className={`${nunito.className} antialiased`}>
+        {/* SVG Filter for PreLoader */}
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style={{ position: 'absolute', width: 0, height: 0 }}>
+          <defs>
+            <filter id="goo">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
+              <feColorMatrix
+                in="blur"
+                mode="matrix"
+                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -7"
+                result="goo"
+              />
+              <feBlend in="SourceGraphic" in2="goo" />
+            </filter>
+          </defs>
+        </svg>
+        
+        {/* PreLoader */}
+        <PreLoader />
+        
         {/* Background effects */}
         <div className="fixed inset-0 star-field opacity-30 pointer-events-none" />
         <div className="fixed inset-0 cosmic-bg pointer-events-none" />

@@ -63,11 +63,13 @@ export function PaywallStep() {
   const { data, prevStep, setReportId } = useQuizStore();
   const [selectedPlan, setSelectedPlan] = useState('trial_2w');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(true);
   const [reportId, setLocalReportId] = useState<string | null>(null);
 
   // Generate report on mount
   useEffect(() => {
     const generateReport = async () => {
+      setIsGenerating(true);
       try {
         const response = await fetch('/api/generate-report', {
           method: 'POST',
@@ -82,6 +84,11 @@ export function PaywallStep() {
             moonSign: data.moonSign,
             risingSign: data.risingSign,
             palmReading: data.palmReading,
+            // Additional fields for AI personalization
+            goals: data.goals,
+            relationshipStatus: data.relationshipStatus,
+            favoriteColor: data.favoriteColor,
+            element: data.element,
           }),
         });
 
@@ -89,6 +96,14 @@ export function PaywallStep() {
         if (result.success && result.reportId) {
           setLocalReportId(result.reportId);
           setReportId(result.reportId);
+          
+          // Store the full report in localStorage for the report page
+          if (result.report) {
+            localStorage.setItem(
+              `astroline-report-${result.reportId}`,
+              JSON.stringify(result.report)
+            );
+          }
         }
       } catch (error) {
         console.error('Failed to generate report:', error);
@@ -96,6 +111,8 @@ export function PaywallStep() {
         const fallbackId = Math.random().toString(36).substring(2, 10);
         setLocalReportId(fallbackId);
         setReportId(fallbackId);
+      } finally {
+        setIsGenerating(false);
       }
     };
 
@@ -108,9 +125,19 @@ export function PaywallStep() {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     // In real app: redirect to Stripe checkout
-    // For now, redirect to report page (free preview)
+    // For testing: update isPaid in localStorage and redirect
     if (reportId) {
-      router.push(`/report/${reportId}`);
+      const storedReport = localStorage.getItem(`astroline-report-${reportId}`);
+      if (storedReport) {
+        try {
+          const report = JSON.parse(storedReport);
+          report.isPaid = true;
+          localStorage.setItem(`astroline-report-${reportId}`, JSON.stringify(report));
+        } catch (error) {
+          console.error('Failed to update report payment status:', error);
+        }
+      }
+      router.push(`/report/${reportId}?payment=success`);
     }
     setIsLoading(false);
   };
@@ -260,10 +287,16 @@ export function PaywallStep() {
         {/* Free preview option */}
         <button
           onClick={handleViewFreeReport}
-          disabled={!reportId}
-          className="w-full text-sm text-accent hover:text-accent-light transition-colors disabled:opacity-50"
+          disabled={isGenerating || !reportId}
+          className="w-full text-sm text-accent hover:text-accent-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          👁️ Переглянути безкоштовний попередній перегляд
+          {isGenerating ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="animate-spin">⏳</span> Генеруємо ваш звіт...
+            </span>
+          ) : (
+            '👁️ Переглянути безкоштовний попередній перегляд'
+          )}
         </button>
 
         <button

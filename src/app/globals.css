@@ -14,6 +14,19 @@
     --color-accent: 78 205 196;
     --color-text-primary: 240 240 240;
     --color-text-secondary: 160 160 160;
+    
+    /* PreLoader CSS Variables */
+    --intro-dark-color: #273355;
+    --intro-light-color: #11DBD9;
+    --angle: 5deg;
+    --color1: #FF217B;
+    --color2: #FF7878;
+    --color3: #FFA283;
+    --color4: #962A4E;
+    --color5: #13C2D3;
+    --goocolor: #11DBD9;
+    --orbitcolor: grey;
+    --animtime: 8s;
   }
 
   * {

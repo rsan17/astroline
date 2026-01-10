@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuizStore } from '@/hooks/useQuizStore';
+import { calculateZodiacSignFromDate } from '@/lib/utils';
 
 const loadingMessages = [
   { text: 'Аналізуємо позиції планет...', icon: '🪐' },
@@ -15,7 +16,7 @@ const loadingMessages = [
 const zodiacSigns = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
 
 export function CalculatingStep() {
-  const { nextStep, setCalculating, updateData } = useQuizStore();
+  const { data, nextStep, setCalculating, updateData } = useQuizStore();
   const [currentMessage, setCurrentMessage] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -35,11 +36,18 @@ export function CalculatingStep() {
     // Complete after 5 seconds
     const timeout = setTimeout(() => {
       setCalculating(false);
-      // Simulate calculated astro data
+      
+      // Calculate sun sign from birth date
+      const calculatedSunSign = data.birthDate 
+        ? calculateZodiacSignFromDate(data.birthDate) || 'Лев' // fallback only if date missing or invalid
+        : 'Лев'; // fallback only if date missing
+      
+      // Use calculated sun sign as placeholder for moon and rising signs
+      // (proper calculation requires ephemeris data and birth coordinates)
       updateData({
-        sunSign: 'Лев',
-        moonSign: 'Риби',
-        risingSign: 'Скорпіон',
+        sunSign: calculatedSunSign,
+        moonSign: calculatedSunSign, // placeholder until proper calculation
+        risingSign: calculatedSunSign, // placeholder until proper calculation
       });
       nextStep();
     }, 5000);
@@ -49,7 +57,7 @@ export function CalculatingStep() {
       clearInterval(progressInterval);
       clearTimeout(timeout);
     };
-  }, [nextStep, setCalculating, updateData]);
+  }, [data.birthDate, nextStep, setCalculating, updateData]);
 
   return (
     <motion.div

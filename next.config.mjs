@@ -42,15 +42,15 @@ const nextConfig = {
   },
 
   // Webpack configuration
-  webpack: (config, { isServer }) => {
-    // Handle SVG imports
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ['@svgr/webpack'],
-    });
-
-    return config;
-  },
+  // Note: SVG webpack config removed - no SVG imports detected
+  // If you need to import SVGs as React components, install @svgr/webpack and uncomment:
+  // webpack: (config, { isServer }) => {
+  //   config.module.rules.push({
+  //     test: /\.svg$/,
+  //     use: ['@svgr/webpack'],
+  //   });
+  //   return config;
+  // },
 
   // Logging configuration
   logging: {
