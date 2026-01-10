@@ -3,10 +3,20 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Check, Star, Sparkles, Crown } from 'lucide-react';
+import { Check, Star, Sparkles, Crown, Loader2 } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { AnimatePresence } from 'framer-motion';
+
+const generatingPhrases = [
+  { text: 'Читаю зорі...', icon: '✨' },
+  { text: 'Розшифровую натальну карту...', icon: '🌙' },
+  { text: 'Аналізую позицію планет...', icon: '🪐' },
+  { text: 'Вирівнюю енергії...', icon: '🔮' },
+  { text: 'Складаю ваш прогноз...', icon: '📜' },
+  { text: 'Генерую звіт...', icon: '⭐' },
+];
 
 const plans = [
   {
@@ -65,6 +75,18 @@ export function PaywallStep() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(true);
   const [reportId, setLocalReportId] = useState<string | null>(null);
+  const [phraseIndex, setPhraseIndex] = useState(0);
+
+  // Animate through generating phrases
+  useEffect(() => {
+    if (!isGenerating) return;
+
+    const interval = setInterval(() => {
+      setPhraseIndex((prev) => (prev + 1) % generatingPhrases.length);
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [isGenerating]);
 
   // Generate report on mount
   useEffect(() => {
@@ -279,9 +301,42 @@ export function PaywallStep() {
         <Button 
           onClick={handlePurchase} 
           isLoading={isLoading}
-          className="w-full text-lg py-5"
+          disabled={isGenerating || isLoading}
+          className="w-full text-lg py-5 relative overflow-hidden"
         >
-          {isLoading ? 'Обробка...' : 'Отримати доступ'}
+          <AnimatePresence mode="wait">
+            {isGenerating ? (
+              <motion.span
+                key={phraseIndex}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center justify-center gap-2"
+              >
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>{generatingPhrases[phraseIndex].icon}</span>
+                <span>{generatingPhrases[phraseIndex].text}</span>
+              </motion.span>
+            ) : isLoading ? (
+              <motion.span
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                Обробка...
+              </motion.span>
+            ) : (
+              <motion.span
+                key="ready"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'spring', duration: 0.5 }}
+              >
+                Отримати доступ
+              </motion.span>
+            )}
+          </AnimatePresence>
         </Button>
 
         {/* Free preview option */}
