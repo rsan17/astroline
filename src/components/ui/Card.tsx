@@ -11,9 +11,9 @@ interface CardProps extends HTMLMotionProps<'div'> {
 }
 
 const variantClasses: Record<CardVariant, string> = {
-  default: 'glass',
-  strong: 'glass-strong',
-  interactive: 'card-interactive',
+  default: 'bg-white/5 backdrop-blur-sm border border-white/10',
+  strong: 'bg-white/[0.08] backdrop-blur-md border border-white/15',
+  interactive: 'bg-white/[0.02] border border-white/5 cursor-pointer hover:border-white/20 hover:bg-white/[0.05] transition-all duration-500',
 };
 
 export function Card({
@@ -31,7 +31,7 @@ export function Card({
       className={cn(
         variantClasses[variant],
         'rounded-2xl p-6',
-        selected && 'card-selected',
+        selected && 'border-accent/50 bg-accent/10 ring-1 ring-accent/20',
         className
       )}
       {...props}
@@ -40,4 +40,3 @@ export function Card({
     </motion.div>
   );
 }
-

@@ -25,11 +25,11 @@ export function GenderStep() {
       exit={{ opacity: 0, y: -20 }}
       className="w-full max-w-md mx-auto"
     >
-      <div className="text-center mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold gradient-text mb-3">
+      <div className="text-center mb-10">
+        <h2 className="text-2xl md:text-3xl font-heading text-white mb-3">
           Хто ви?
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-white/60 font-light">
           Це допоможе персоналізувати ваш астрологічний звіт
         </p>
       </div>
@@ -54,4 +54,3 @@ export function GenderStep() {
     </motion.div>
   );
 }
-

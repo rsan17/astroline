@@ -13,14 +13,14 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.2,
+      staggerChildren: 0.15,
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
 export function NatalChartSection({ natalChart }: NatalChartSectionProps) {
@@ -51,7 +51,7 @@ export function NatalChartSection({ natalChart }: NatalChartSectionProps) {
   ];
 
   return (
-    <section className="py-20 px-4">
+    <section className="py-20 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -59,40 +59,40 @@ export function NatalChartSection({ natalChart }: NatalChartSectionProps) {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            🌌 <span className="gradient-text">Натальна карта</span>
+          <span className="text-xs uppercase tracking-widest text-white/40 mb-4 block">
+            Натальна карта
+          </span>
+          <h2 className="text-3xl md:text-4xl font-heading text-white mb-4">
+            🌌 Ваша астрологічна ДНК
           </h2>
-          <p className="text-text-secondary max-w-2xl mx-auto">
-            Три ключові знаки, які формують вашу унікальну астрологічну ДНК
-          </p>
+          <div className="w-12 h-px bg-white/10 mx-auto" />
         </motion.div>
 
         {/* SVG Chart Visualization */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="flex justify-center mb-12"
+          className="flex justify-center mb-16"
         >
           <div className="relative w-72 h-72 md:w-96 md:h-96">
             {/* Outer ring */}
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 200">
               <defs>
                 <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#4ECDC4" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#667eea" stopOpacity="0.3" />
+                  <stop offset="0%" stopColor="#548FC2" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#8b9dc3" stopOpacity="0.2" />
                 </linearGradient>
               </defs>
-              {/* Zodiac wheel */}
-              <circle cx="100" cy="100" r="95" fill="none" stroke="url(#ringGradient)" strokeWidth="2" />
-              <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-              <circle cx="100" cy="100" r="45" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+              <circle cx="100" cy="100" r="95" fill="none" stroke="url(#ringGradient)" strokeWidth="1" />
+              <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+              <circle cx="100" cy="100" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
               
               {/* Connection lines */}
               <motion.line
                 x1="100" y1="30" x2="35" y2="145"
-                stroke="#4ECDC4" strokeWidth="1" strokeOpacity="0.5"
+                stroke="#548FC2" strokeWidth="1" strokeOpacity="0.3"
                 initial={{ pathLength: 0 }}
                 whileInView={{ pathLength: 1 }}
                 viewport={{ once: true }}
@@ -100,7 +100,7 @@ export function NatalChartSection({ natalChart }: NatalChartSectionProps) {
               />
               <motion.line
                 x1="35" y1="145" x2="165" y2="145"
-                stroke="#667eea" strokeWidth="1" strokeOpacity="0.5"
+                stroke="#8b9dc3" strokeWidth="1" strokeOpacity="0.3"
                 initial={{ pathLength: 0 }}
                 whileInView={{ pathLength: 1 }}
                 viewport={{ once: true }}
@@ -108,7 +108,7 @@ export function NatalChartSection({ natalChart }: NatalChartSectionProps) {
               />
               <motion.line
                 x1="165" y1="145" x2="100" y2="30"
-                stroke="#764ba2" strokeWidth="1" strokeOpacity="0.5"
+                stroke="#548FC2" strokeWidth="1" strokeOpacity="0.3"
                 initial={{ pathLength: 0 }}
                 whileInView={{ pathLength: 1 }}
                 viewport={{ once: true }}
@@ -124,7 +124,7 @@ export function NatalChartSection({ natalChart }: NatalChartSectionProps) {
               transition={{ delay: 0.3, type: 'spring' }}
               className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2"
             >
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-glow">
+              <div className="w-14 h-14 md:w-18 md:h-18 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
                 <span className="text-2xl md:text-3xl">{sunSign.symbol}</span>
               </div>
             </motion.div>
@@ -136,7 +136,7 @@ export function NatalChartSection({ natalChart }: NatalChartSectionProps) {
               transition={{ delay: 0.5, type: 'spring' }}
               className="absolute bottom-4 left-4 md:bottom-8 md:left-8"
             >
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-glow">
+              <div className="w-14 h-14 md:w-18 md:h-18 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
                 <span className="text-2xl md:text-3xl">{moonSign.symbol}</span>
               </div>
             </motion.div>
@@ -148,7 +148,7 @@ export function NatalChartSection({ natalChart }: NatalChartSectionProps) {
               transition={{ delay: 0.7, type: 'spring' }}
               className="absolute bottom-4 right-4 md:bottom-8 md:right-8"
             >
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center shadow-glow">
+              <div className="w-14 h-14 md:w-18 md:h-18 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
                 <span className="text-2xl md:text-3xl">{risingSign.symbol}</span>
               </div>
             </motion.div>
@@ -158,7 +158,7 @@ export function NatalChartSection({ natalChart }: NatalChartSectionProps) {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-                className="text-4xl opacity-30"
+                className="text-3xl opacity-20 text-white/40"
               >
                 ✧
               </motion.div>
@@ -178,29 +178,29 @@ export function NatalChartSection({ natalChart }: NatalChartSectionProps) {
             <motion.div
               key={item.title}
               variants={itemVariants}
-              className="glass rounded-2xl p-6 hover:border-accent/30 transition-all duration-300"
+              className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all duration-500"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getElementColorClass(item.sign.element)} flex items-center justify-center`}>
                   <span className="text-2xl">{item.icon}</span>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-text-primary">{item.title}</h3>
-                  <p className="text-sm text-text-secondary">{item.position}</p>
+                  <h3 className="font-heading text-white">{item.title}</h3>
+                  <p className="text-xs text-white/40">{item.position}</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-3xl">{item.sign.symbol}</span>
-                <span className="text-xl font-bold text-text-primary">{item.sign.name}</span>
+                <span className="text-xl font-heading text-white">{item.sign.name}</span>
                 <span>{getElementEmoji(item.sign.element)}</span>
               </div>
 
-              <p className="text-sm text-text-secondary leading-relaxed">
+              <p className="text-sm text-white/60 font-light leading-relaxed">
                 {item.description}
               </p>
 
-              <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-text-muted">
+              <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between text-xs text-white/30">
                 <span>Планета: {item.sign.rulingPlanet}</span>
                 <span className="capitalize">
                   {item.sign.modality === 'cardinal' ? 'Кардинальний' : item.sign.modality === 'fixed' ? 'Фіксований' : 'Мутабельний'}
@@ -213,4 +213,3 @@ export function NatalChartSection({ natalChart }: NatalChartSectionProps) {
     </section>
   );
 }
-

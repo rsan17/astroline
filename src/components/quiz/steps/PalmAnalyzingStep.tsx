@@ -17,7 +17,6 @@ export function PalmAnalyzingStep() {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  // If palm step was skipped, go directly to next step without animation
   const wasSkipped = data.palmImageUrl === 'skipped';
 
   useEffect(() => {
@@ -26,19 +25,15 @@ export function PalmAnalyzingStep() {
       return;
     }
 
-    // Rotate through analysis steps
     const stepInterval = setInterval(() => {
       setCurrentStep(prev => (prev + 1) % analysisSteps.length);
     }, 1200);
 
-    // Animate progress
     const progressInterval = setInterval(() => {
       setProgress(prev => Math.min(prev + 2.5, 100));
     }, 100);
 
-    // Complete after 4 seconds
     const timeout = setTimeout(() => {
-      // Simulate palm reading results
       updateData({
         palmReading: {
           childrenCount: '2-3',
@@ -65,12 +60,12 @@ export function PalmAnalyzingStep() {
       className="w-full max-w-md mx-auto text-center"
     >
       {/* Animated hand with scanning effect */}
-      <div className="relative w-48 h-48 mx-auto mb-8">
-        {/* Background glow */}
+      <div className="relative w-48 h-48 mx-auto mb-10">
+        {/* Background glow - subtle */}
         <motion.div
           animate={{ 
-            scale: [1, 1.3, 1],
-            opacity: [0.3, 0.6, 0.3]
+            scale: [1, 1.2, 1],
+            opacity: [0.15, 0.3, 0.15]
           }}
           transition={{ duration: 2, repeat: Infinity }}
           className="absolute inset-0 rounded-full bg-accent/20 blur-2xl"
@@ -78,23 +73,18 @@ export function PalmAnalyzingStep() {
         
         {/* Hand emoji */}
         <motion.div
-          animate={{ 
-            scale: [1, 1.05, 1],
-          }}
+          animate={{ scale: [1, 1.03, 1] }}
           transition={{ duration: 1.5, repeat: Infinity }}
-          className="absolute inset-0 flex items-center justify-center text-8xl"
+          className="absolute inset-0 flex items-center justify-center text-7xl"
         >
           🤚
         </motion.div>
 
         {/* Scanning line */}
         <motion.div
-          animate={{ 
-            top: ['20%', '80%', '20%'],
-          }}
+          animate={{ top: ['20%', '80%', '20%'] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute left-4 right-4 h-1 bg-gradient-to-r from-transparent via-accent to-transparent rounded-full"
-          style={{ boxShadow: '0 0 20px rgba(78, 205, 196, 0.8)' }}
+          className="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent rounded-full"
         />
 
         {/* Floating particles */}
@@ -102,16 +92,16 @@ export function PalmAnalyzingStep() {
           <motion.div
             key={i}
             animate={{
-              y: [0, -30, 0],
-              x: [0, (i % 2 === 0 ? 10 : -10), 0],
-              opacity: [0, 1, 0],
+              y: [0, -25, 0],
+              x: [0, (i % 2 === 0 ? 8 : -8), 0],
+              opacity: [0, 0.8, 0],
             }}
             transition={{
               duration: 2,
               repeat: Infinity,
               delay: i * 0.3,
             }}
-            className="absolute w-2 h-2 rounded-full bg-accent"
+            className="absolute w-1.5 h-1.5 rounded-full bg-accent"
             style={{
               left: `${20 + (i * 12)}%`,
               top: '50%',
@@ -131,7 +121,7 @@ export function PalmAnalyzingStep() {
             className="flex items-center gap-3"
           >
             <span className="text-2xl">{analysisSteps[currentStep].icon}</span>
-            <span className="text-lg text-text-primary">
+            <span className="text-lg text-white/80 font-light">
               {analysisSteps[currentStep].text}
             </span>
           </motion.div>
@@ -139,10 +129,10 @@ export function PalmAnalyzingStep() {
       </div>
 
       {/* Progress bar */}
-      <div className="w-full max-w-xs mx-auto mb-4">
-        <div className="progress-bar">
+      <div className="w-full max-w-xs mx-auto mb-6">
+        <div className="h-1 bg-white/10 rounded-full overflow-hidden">
           <motion.div
-            className="progress-fill"
+            className="h-full bg-accent"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -153,11 +143,11 @@ export function PalmAnalyzingStep() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="glass rounded-xl p-4"
+        className="bg-white/5 border border-white/10 rounded-xl p-4"
       >
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="text-left">
-            <span className="text-text-muted">Лінії проаналізовано:</span>
+            <span className="text-white/40 font-light">Лінії проаналізовано:</span>
           </div>
           <div className="text-right">
             <motion.span 
@@ -168,7 +158,7 @@ export function PalmAnalyzingStep() {
             </motion.span>
           </div>
           <div className="text-left">
-            <span className="text-text-muted">Точок інтересу:</span>
+            <span className="text-white/40 font-light">Точок інтересу:</span>
           </div>
           <div className="text-right">
             <span className="text-accent font-medium">
@@ -180,4 +170,3 @@ export function PalmAnalyzingStep() {
     </motion.div>
   );
 }
-

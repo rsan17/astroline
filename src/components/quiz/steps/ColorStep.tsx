@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 const colorOptions = [
   { value: 'red', label: 'Червоний', color: '#ef4444', meaning: 'Пристрасть' },
-  { value: 'blue', label: 'Синій', color: '#3b82f6', meaning: 'Спокій' },
+  { value: 'blue', label: 'Синій', color: '#548FC2', meaning: 'Спокій' },
   { value: 'green', label: 'Зелений', color: '#22c55e', meaning: 'Гармонія' },
   { value: 'purple', label: 'Фіолетовий', color: '#a855f7', meaning: 'Духовність' },
   { value: 'gold', label: 'Золотий', color: '#fbbf24', meaning: 'Успіх' },
@@ -30,18 +30,18 @@ export function ColorStep() {
       exit={{ opacity: 0, y: -20 }}
       className="w-full max-w-md mx-auto"
     >
-      <div className="text-center mb-8">
+      <div className="text-center mb-10">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="text-5xl mb-4"
+          className="text-4xl mb-4"
         >
           🎨
         </motion.div>
-        <h2 className="text-2xl md:text-3xl font-bold gradient-text mb-3">
+        <h2 className="text-2xl md:text-3xl font-heading text-white mb-3">
           Ваш улюблений колір
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-white/60 font-light">
           Кольори мають глибокий зв'язок з вашою енергією
         </p>
       </div>
@@ -56,12 +56,12 @@ export function ColorStep() {
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.08, type: 'spring' }}
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleSelect(option.value)}
               className={cn(
                 'relative aspect-square rounded-2xl transition-all duration-300',
-                isSelected && 'ring-4 ring-white/50'
+                isSelected && 'ring-2 ring-white/50'
               )}
               style={{ backgroundColor: option.color }}
             >
@@ -92,7 +92,7 @@ export function ColorStep() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-6"
         >
-          <span className="text-text-secondary">
+          <span className="text-white/60 font-light">
             {colorOptions.find(c => c.value === data.favoriteColor)?.meaning}
           </span>
         </motion.div>
@@ -109,4 +109,3 @@ export function ColorStep() {
     </motion.div>
   );
 }
-

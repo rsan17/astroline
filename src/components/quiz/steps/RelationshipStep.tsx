@@ -28,18 +28,18 @@ export function RelationshipStep() {
       exit={{ opacity: 0, y: -20 }}
       className="w-full max-w-md mx-auto"
     >
-      <div className="text-center mb-8">
+      <div className="text-center mb-10">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="text-5xl mb-4"
+          className="text-4xl mb-4"
         >
           💕
         </motion.div>
-        <h2 className="text-2xl md:text-3xl font-bold gradient-text mb-3">
+        <h2 className="text-2xl md:text-3xl font-heading text-white mb-3">
           Ваш сімейний статус
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-white/60 font-light">
           Це допоможе краще інтерпретувати ваші астрологічні аспекти
         </p>
       </div>
@@ -74,4 +74,3 @@ export function RelationshipStep() {
     </motion.div>
   );
 }
-

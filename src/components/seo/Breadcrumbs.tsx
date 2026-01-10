@@ -11,7 +11,6 @@ interface BreadcrumbsProps {
 }
 
 export function Breadcrumbs({ items, className = '' }: BreadcrumbsProps) {
-  // Always prepend home
   const fullItems: BreadcrumbItem[] = [
     { name: 'Головна', url: BASE_URL },
     ...items,
@@ -33,16 +32,16 @@ export function Breadcrumbs({ items, className = '' }: BreadcrumbsProps) {
           return (
             <div key={item.url} className="flex items-center gap-2">
               {index > 0 && (
-                <ChevronRight className="w-4 h-4 text-text-muted" />
+                <ChevronRight className="w-4 h-4 text-white/20" />
               )}
               {isLast ? (
-                <span className="text-text-primary font-medium truncate max-w-[200px]">
+                <span className="text-white/90 font-medium truncate max-w-[200px]">
                   {item.name}
                 </span>
               ) : (
                 <Link
                   href={item.url.replace(BASE_URL, '')}
-                  className="text-text-secondary hover:text-accent transition-colors flex items-center gap-1"
+                  className="text-white/40 hover:text-accent transition-colors flex items-center gap-1"
                 >
                   {isFirst && <Home className="w-4 h-4" />}
                   <span className={isFirst ? 'sr-only sm:not-sr-only' : ''}>

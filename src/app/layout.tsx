@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next';
-import { Philosopher, Nunito } from 'next/font/google';
+import { Philosopher, Inter } from 'next/font/google';
 import './globals.css';
 import PreLoader from '@/components/ui/PreLoader';
+import { StarField } from '@/components/ui/StarField';
 
 const philosopher = Philosopher({
   subsets: ['latin', 'cyrillic'],
@@ -10,10 +11,11 @@ const philosopher = Philosopher({
   weight: ['400', '700'],
 });
 
-const nunito = Nunito({
+const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   display: 'swap',
   variable: '--font-sans',
+  weight: ['300', '400', '500', '600'],
 });
 
 // Support both custom domain and Vercel preview URLs
@@ -88,7 +90,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0a0f1a',
+  themeColor: '#1a1f2e',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -101,8 +103,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="uk" className={`${philosopher.variable} ${nunito.variable}`}>
-      <body className={`${nunito.className} antialiased`}>
+    <html lang="uk" className={`${philosopher.variable} ${inter.variable}`}>
+      <body className={`${inter.className} antialiased`}>
         {/* SVG Filter for PreLoader */}
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style={{ position: 'absolute', width: 0, height: 0 }}>
           <defs>
@@ -122,8 +124,10 @@ export default function RootLayout({
         {/* PreLoader */}
         <PreLoader />
         
-        {/* Background effects */}
-        <div className="fixed inset-0 star-field opacity-30 pointer-events-none" />
+        {/* Animated Star Field Background */}
+        <StarField />
+        
+        {/* Subtle cosmic gradient overlay */}
         <div className="fixed inset-0 cosmic-bg pointer-events-none" />
         <div className="aurora" />
         

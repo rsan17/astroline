@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils';
 
 const goalOptions = [
   { value: 'love', label: 'Кохання', icon: '❤️' },
-  { value: 'career', label: 'Кар\'єра', icon: '💼' },
-  { value: 'health', label: 'Здоров\'я', icon: '🏥' },
+  { value: 'career', label: "Кар'єра", icon: '💼' },
+  { value: 'health', label: "Здоров'я", icon: '🏥' },
   { value: 'finance', label: 'Фінанси', icon: '💰' },
   { value: 'spiritual', label: 'Духовний розвиток', icon: '🧘' },
   { value: 'future', label: 'Майбутнє', icon: '🔮' },
@@ -39,18 +39,18 @@ export function GoalsStep() {
       exit={{ opacity: 0, y: -20 }}
       className="w-full max-w-md mx-auto"
     >
-      <div className="text-center mb-8">
+      <div className="text-center mb-10">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="text-5xl mb-4"
+          className="text-4xl mb-4"
         >
           🎯
         </motion.div>
-        <h2 className="text-2xl md:text-3xl font-bold gradient-text mb-3">
+        <h2 className="text-2xl md:text-3xl font-heading text-white mb-3">
           Що вас цікавить найбільше?
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-white/60 font-light">
           Оберіть до {MAX_GOALS} варіантів
         </p>
       </div>
@@ -63,28 +63,29 @@ export function GoalsStep() {
           return (
             <motion.button
               key={option.value}
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
-              whileHover={{ scale: isDisabled ? 1 : 1.05 }}
-              whileTap={{ scale: isDisabled ? 1 : 0.95 }}
+              whileHover={{ scale: isDisabled ? 1 : 1.02 }}
+              whileTap={{ scale: isDisabled ? 1 : 0.98 }}
               onClick={() => toggleGoal(option.value)}
               disabled={isDisabled}
               className={cn(
-                'glass rounded-xl p-4 flex flex-col items-center gap-2 transition-all duration-300',
-                isSelected && 'border-accent/50 bg-accent/10 ring-2 ring-accent/20',
+                'bg-white/[0.02] border border-white/5 rounded-xl p-4 flex flex-col items-center gap-2 transition-all duration-500',
+                'hover:bg-white/[0.05] hover:border-white/10',
+                isSelected && 'border-accent/50 bg-accent/10',
                 isDisabled && 'opacity-40 cursor-not-allowed'
               )}
             >
               <span className="text-3xl">{option.icon}</span>
-              <span className="text-sm font-medium text-text-primary">{option.label}</span>
+              <span className="text-sm font-medium text-white/90">{option.label}</span>
             </motion.button>
           );
         })}
       </div>
 
       <div className="text-center mb-6">
-        <span className="text-sm text-text-muted">
+        <span className="text-xs uppercase tracking-widest text-white/30">
           Обрано: {selectedGoals.length} з {MAX_GOALS}
         </span>
       </div>
@@ -100,4 +101,3 @@ export function GoalsStep() {
     </motion.div>
   );
 }
-

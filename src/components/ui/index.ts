@@ -8,3 +8,4 @@ export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './
 export { Carousel, CarouselItem } from './Carousel';
 export { ConfettiEffect, EmojiConfetti, FireworkBurst } from './ConfettiEffect';
 export { default as PreLoader } from './PreLoader';
+export { StarField } from './StarField';

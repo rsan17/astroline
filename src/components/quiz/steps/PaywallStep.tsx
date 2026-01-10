@@ -106,7 +106,6 @@ export function PaywallStep() {
             moonSign: data.moonSign,
             risingSign: data.risingSign,
             palmReading: data.palmReading,
-            // Additional fields for AI personalization
             goals: data.goals,
             relationshipStatus: data.relationshipStatus,
             favoriteColor: data.favoriteColor,
@@ -119,7 +118,6 @@ export function PaywallStep() {
           setLocalReportId(result.reportId);
           setReportId(result.reportId);
           
-          // Store the full report in localStorage for the report page
           if (result.report) {
             localStorage.setItem(
               `astroline-report-${result.reportId}`,
@@ -129,7 +127,6 @@ export function PaywallStep() {
         }
       } catch (error) {
         console.error('Failed to generate report:', error);
-        // Generate a fallback ID
         const fallbackId = Math.random().toString(36).substring(2, 10);
         setLocalReportId(fallbackId);
         setReportId(fallbackId);
@@ -143,11 +140,8 @@ export function PaywallStep() {
 
   const handlePurchase = async () => {
     setIsLoading(true);
-    // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // In real app: redirect to Stripe checkout
-    // For testing: update isPaid in localStorage and redirect
     if (reportId) {
       const storedReport = localStorage.getItem(`astroline-report-${reportId}`);
       if (storedReport) {
@@ -177,19 +171,19 @@ export function PaywallStep() {
       exit={{ opacity: 0 }}
       className="w-full max-w-lg mx-auto px-1 sm:px-0"
     >
-      <div className="text-center mb-6 sm:mb-8">
+      <div className="text-center mb-8">
         <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
           transition={{ type: 'spring' }}
-          className="text-4xl sm:text-5xl mb-3 sm:mb-4"
+          className="text-4xl sm:text-5xl mb-4"
         >
           🎉
         </motion.div>
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold gradient-text mb-2 sm:mb-3">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-heading text-white mb-3">
           Ваш звіт готовий!
         </h2>
-        <p className="text-sm sm:text-base text-text-secondary">
+        <p className="text-sm sm:text-base text-white/60 font-light">
           Оберіть план, щоб отримати повний доступ
         </p>
       </div>
@@ -199,20 +193,20 @@ export function PaywallStep() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="glass rounded-2xl p-4 mb-6"
+        className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-6"
       >
         <div className="flex items-center justify-between text-sm">
-          <span className="text-text-secondary">Підготовлено для:</span>
-          <span className="text-text-primary font-medium">{data.email}</span>
+          <span className="text-white/40">Підготовлено для:</span>
+          <span className="text-white font-medium">{data.email}</span>
         </div>
         <div className="flex items-center justify-between text-sm mt-2">
-          <span className="text-text-secondary">Ваш знак:</span>
+          <span className="text-white/40">Ваш знак:</span>
           <span className="text-accent font-medium">{data.sunSign || 'Лев'} ☀️</span>
         </div>
       </motion.div>
 
       {/* Pricing cards */}
-      <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+      <div className="space-y-3 sm:space-y-4 mb-8">
         {plans.map((plan, index) => (
           <motion.button
             key={plan.id}
@@ -221,15 +215,15 @@ export function PaywallStep() {
             transition={{ delay: 0.3 + index * 0.1 }}
             onClick={() => setSelectedPlan(plan.id)}
             className={cn(
-              'w-full glass rounded-2xl p-4 sm:p-5 text-left transition-all duration-300 relative overflow-hidden',
-              selectedPlan === plan.id && 'ring-2 ring-accent border-accent/50',
+              'w-full bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 text-left transition-all duration-500 relative overflow-hidden',
+              selectedPlan === plan.id && 'ring-1 ring-accent border-accent/50 bg-accent/5',
               plan.popular && 'border-accent/30'
             )}
           >
             {plan.badge && (
               <span className={cn(
                 'absolute top-0 right-0 text-xs font-medium px-3 py-1 rounded-bl-xl',
-                plan.popular ? 'bg-accent text-background' : 'bg-gold/80 text-background'
+                plan.popular ? 'bg-accent text-white' : 'bg-gold/80 text-cosmic-bg'
               )}>
                 {plan.badge}
               </span>
@@ -239,28 +233,28 @@ export function PaywallStep() {
               <div className={cn(
                 'w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0',
                 selectedPlan === plan.id 
-                  ? 'bg-accent text-background' 
-                  : 'bg-white/10 text-text-secondary'
+                  ? 'bg-accent text-white' 
+                  : 'bg-white/5 text-white/60'
               )}>
                 {plan.icon}
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-base sm:text-lg font-bold text-text-primary">
+                  <span className="text-base sm:text-lg font-heading text-white">
                     {plan.name}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
-                  <span className="text-xl sm:text-2xl font-bold text-accent">
+                  <span className="text-xl sm:text-2xl font-heading text-accent">
                     {plan.price}
                   </span>
                   {plan.originalPrice && (
-                    <span className="text-xs sm:text-sm text-text-muted line-through">
+                    <span className="text-xs sm:text-sm text-white/30 line-through">
                       {plan.originalPrice}
                     </span>
                   )}
-                  <span className="text-xs sm:text-sm text-text-secondary">
+                  <span className="text-xs sm:text-sm text-white/40">
                     {plan.period}
                   </span>
                 </div>
@@ -270,10 +264,10 @@ export function PaywallStep() {
                 'w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0',
                 selectedPlan === plan.id 
                   ? 'border-accent bg-accent' 
-                  : 'border-white/30'
+                  : 'border-white/20'
               )}>
                 {selectedPlan === plan.id && (
-                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-background" />
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 )}
               </div>
             </div>
@@ -281,7 +275,7 @@ export function PaywallStep() {
             {/* Features */}
             <div className="mt-4 pl-0 sm:pl-16 space-y-2">
               {plan.features.map((feature, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs sm:text-sm text-text-secondary">
+                <div key={i} className="flex items-center gap-2 text-xs sm:text-sm text-white/60">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4 text-accent flex-shrink-0" />
                   {feature}
                 </div>
@@ -356,7 +350,7 @@ export function PaywallStep() {
 
         <button
           onClick={prevStep}
-          className="w-full text-sm text-text-muted hover:text-text-secondary transition-colors"
+          className="w-full text-sm text-white/30 hover:text-white/60 transition-colors"
         >
           ← Повернутись назад
         </button>
@@ -367,7 +361,7 @@ export function PaywallStep() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.9 }}
-        className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-6 sm:mt-8 text-xs text-text-muted"
+        className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-8 text-xs text-white/30"
       >
         <span className="flex items-center gap-1">
           🔒 Безпечна оплата

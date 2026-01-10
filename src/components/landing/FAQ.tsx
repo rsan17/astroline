@@ -11,7 +11,7 @@ const faqs = [
   },
   {
     question: 'Як працює аналіз долоні?',
-    answer: 'Ми використовуємо технологію комп\'ютерного зору та AI для аналізу ліній долоні. Система розпізнає лінію життя, серця та голови, інтерпретуючи їх значення за класичними методами хіромантії.',
+    answer: "Ми використовуємо технологію комп'ютерного зору та AI для аналізу ліній долоні. Система розпізнає лінію життя, серця та голови, інтерпретуючи їх значення за класичними методами хіромантії.",
   },
   {
     question: 'Чи безпечні мої персональні дані?',
@@ -35,40 +35,40 @@ export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
+    <section id="faq" className="py-20 md:py-28 px-6 lg:px-8">
       <div className="max-w-2xl lg:max-w-3xl mx-auto">
+        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-10 md:mb-12"
+          className="text-center mb-12"
         >
-          <span className="text-accent text-sm font-medium uppercase tracking-wider mb-4 block">
+          <span className="text-xs uppercase tracking-widest text-white/40 mb-4 block">
             FAQ
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Часті <span className="gradient-text">запитання</span>
+          <h2 className="text-3xl md:text-4xl font-heading text-white mb-4">
+            Часті запитання
           </h2>
-          <p className="text-text-secondary">
-            Відповіді на найпопулярніші питання про Astroline
-          </p>
+          <div className="w-12 h-px bg-white/10 mx-auto" />
         </motion.div>
 
-        <div className="space-y-3 sm:space-y-4">
+        {/* FAQ items */}
+        <div className="space-y-4">
           {faqs.map((faq, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="glass rounded-2xl overflow-hidden"
+              transition={{ delay: index * 0.05 }}
+              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full px-4 py-4 sm:px-6 sm:py-5 flex items-center justify-between gap-4 text-left min-h-[56px]"
+                className="w-full px-6 py-5 flex items-center justify-between gap-4 text-left"
               >
-                <span className="font-semibold text-text-primary text-sm sm:text-base">
+                <span className="font-medium text-white/90">
                   {faq.question}
                 </span>
                 <motion.div
@@ -77,9 +77,9 @@ export function FAQ() {
                   className="flex-shrink-0"
                 >
                   {openIndex === index ? (
-                    <Minus className="w-6 h-6 sm:w-5 sm:h-5 text-accent" />
+                    <Minus className="w-5 h-5 text-accent" />
                   ) : (
-                    <Plus className="w-6 h-6 sm:w-5 sm:h-5 text-text-secondary" />
+                    <Plus className="w-5 h-5 text-white/40" />
                   )}
                 </motion.div>
               </button>
@@ -93,7 +93,7 @@ export function FAQ() {
                     transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                     className="overflow-hidden"
                   >
-                    <div className="px-4 pb-4 sm:px-6 sm:pb-5 text-text-secondary leading-relaxed text-sm sm:text-base">
+                    <div className="px-6 pb-5 text-white/60 font-light leading-relaxed">
                       {faq.answer}
                     </div>
                   </motion.div>

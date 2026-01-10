@@ -8,13 +8,13 @@ export function QuizProgress() {
 
   return (
     <div className="w-full max-w-md mx-auto mb-8">
-      <div className="flex justify-between text-sm text-text-secondary mb-2">
+      <div className="flex justify-between text-xs uppercase tracking-widest text-white/40 mb-3">
         <span>Крок {current} з {total}</span>
         <span>{percentage}%</span>
       </div>
-      <div className="progress-bar">
+      <div className="h-1 bg-white/10 rounded-full overflow-hidden">
         <motion.div 
-          className="progress-fill"
+          className="h-full bg-accent"
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -23,4 +23,3 @@ export function QuizProgress() {
     </div>
   );
 }
-

@@ -35,7 +35,6 @@ export function CityAutocomplete({
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout>();
 
-  // Fetch cities from Nominatim API
   const fetchCities = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < 2) {
       setSuggestions([]);
@@ -101,7 +100,6 @@ export function CityAutocomplete({
     }
   }, []);
 
-  // Debounced search
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setQuery(newValue);
@@ -116,7 +114,6 @@ export function CityAutocomplete({
     }, 300);
   };
 
-  // Select a city
   const selectCity = (city: City) => {
     setQuery(city.displayName);
     onChange(city.displayName);
@@ -125,7 +122,6 @@ export function CityAutocomplete({
     setHighlightedIndex(-1);
   };
 
-  // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen || suggestions.length === 0) return;
 
@@ -155,7 +151,6 @@ export function CityAutocomplete({
     }
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -167,7 +162,6 @@ export function CityAutocomplete({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
@@ -176,7 +170,6 @@ export function CityAutocomplete({
     };
   }, []);
 
-  // Sync external value
   useEffect(() => {
     if (value !== query) {
       setQuery(value);
@@ -190,7 +183,7 @@ export function CityAutocomplete({
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
             <MapPin className="w-5 h-5" />
           </span>
           <input
@@ -203,11 +196,11 @@ export function CityAutocomplete({
             placeholder={placeholder}
             autoComplete="off"
             className={cn(
-              'input-default pl-12 pr-10',
+              'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pl-12 pr-10 text-white placeholder-white/30 focus:border-accent/50 focus:ring-1 focus:ring-accent/20 focus:outline-none transition-all duration-300 font-light',
               error && 'border-error focus:border-error focus:ring-error/20'
             )}
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary">
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40">
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
@@ -235,7 +228,7 @@ export function CityAutocomplete({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 w-full mt-2 glass rounded-xl overflow-hidden shadow-xl border border-white/20"
+            className="absolute z-50 w-full mt-2 bg-cosmic-bg-secondary border border-white/10 rounded-xl overflow-hidden shadow-xl"
           >
             <ul className="py-2 max-h-64 overflow-y-auto">
               {suggestions.map((city, index) => (
@@ -253,16 +246,16 @@ export function CityAutocomplete({
                       'w-full px-4 py-3 text-left flex items-center gap-3 transition-colors',
                       highlightedIndex === index
                         ? 'bg-accent/20 text-accent'
-                        : 'hover:bg-white/5 text-text-primary'
+                        : 'hover:bg-white/5 text-white/90'
                     )}
                   >
                     <MapPin className={cn(
                       'w-4 h-4 flex-shrink-0',
-                      highlightedIndex === index ? 'text-accent' : 'text-text-secondary'
+                      highlightedIndex === index ? 'text-accent' : 'text-white/40'
                     )} />
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{city.city}</div>
-                      <div className="text-xs text-text-secondary truncate">
+                      <div className="text-xs text-white/40 truncate">
                         {city.country}
                       </div>
                     </div>
@@ -270,7 +263,7 @@ export function CityAutocomplete({
                 </motion.li>
               ))}
             </ul>
-            <div className="px-4 py-2 border-t border-white/10 text-xs text-text-muted flex items-center gap-1">
+            <div className="px-4 py-2 border-t border-white/5 text-xs text-white/30 flex items-center gap-1">
               <span>Дані:</span>
               <a 
                 href="https://www.openstreetmap.org/copyright" 

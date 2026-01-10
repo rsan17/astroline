@@ -42,7 +42,7 @@ export function QuizContainer() {
 
   if (!StepComponent) {
     return (
-      <div className="text-center text-text-secondary">
+      <div className="text-center text-white/40 font-light">
         Крок {currentStep} не знайдено
       </div>
     );
@@ -54,4 +54,3 @@ export function QuizContainer() {
     </AnimatePresence>
   );
 }
-

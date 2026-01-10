@@ -291,10 +291,10 @@ export function PalmUploadStep() {
         >
           🤚
         </motion.div>
-        <h2 className="text-2xl md:text-3xl font-bold gradient-text mb-3">
+        <h2 className="text-2xl md:text-3xl font-heading text-white mb-3">
           Аналіз долоні
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-white/60 font-light">
           Завантажте фото вашої долоні для детального аналізу ліній долі
         </p>
       </div>
@@ -336,13 +336,13 @@ export function PalmUploadStep() {
                 >
                   <Hand className="w-16 h-16 text-accent opacity-60" />
                 </motion.div>
-                <p className="text-text-primary font-medium mb-2">
+                <p className="text-white/90 font-medium mb-2">
                   {isDragging ? 'Відпустіть файл тут' : 'Перетягніть фото сюди'}
                 </p>
-                <p className="text-sm text-text-secondary mb-4">
+                <p className="text-sm text-white/60 font-light mb-4">
                   або натисніть для вибору файлу
                 </p>
-                <span className="flex items-center gap-2 text-xs text-text-muted bg-white/5 px-3 py-1.5 rounded-full">
+                <span className="flex items-center gap-2 text-xs text-white/40 bg-white/5 px-3 py-1.5 rounded-full">
                   <Upload className="w-3 h-3" /> Обрати файл
                 </span>
                 <input
@@ -530,11 +530,11 @@ export function PalmUploadStep() {
               )}
             </div>
             <div className="text-left">
-              <p className="text-text-primary font-semibold text-lg">
+              <p className="text-white font-medium text-lg">
                 {isCameraLoading ? 'Запуск камери...' : 
                  permissionState === 'denied' ? 'Дозволити камеру' : 'Зробити фото'}
               </p>
-              <p className="text-sm text-text-secondary">
+              <p className="text-sm text-white/60 font-light">
                 {isCameraLoading ? 'Очікуємо дозвіл...' :
                  permissionState === 'prompt' || permissionState === 'unknown' 
                    ? 'Натисніть щоб дозволити доступ до камери' 
@@ -638,7 +638,7 @@ export function PalmUploadStep() {
         transition={{ delay: 0.4 }}
         className="glass rounded-xl p-4 mb-6"
       >
-        <p className="text-sm text-text-secondary text-center">
+        <p className="text-sm text-white/60 font-light text-center">
           💡 Порада: розкрийте долоню і сфотографуйте її при хорошому освітленні
         </p>
       </motion.div>
@@ -654,7 +654,7 @@ export function PalmUploadStep() {
         </div>
         <button
           onClick={handleSkip}
-          className="text-sm text-text-muted hover:text-text-secondary transition-colors"
+          className="text-sm text-white/30 hover:text-white/60 transition-colors font-light"
         >
           Пропустити цей крок
         </button>

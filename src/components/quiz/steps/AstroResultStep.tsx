@@ -20,15 +20,13 @@ const signInfo: Record<string, { icon: string; element: string }> = {
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.9 },
+  hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
-      delay: i * 0.2,
-      type: 'spring',
-      stiffness: 100,
+      delay: i * 0.15,
+      duration: 0.5,
     },
   }),
 };
@@ -49,12 +47,12 @@ export function AstroResultStep() {
       exit={{ opacity: 0 }}
       className="w-full max-w-md mx-auto"
     >
-      <div className="text-center mb-8">
+      <div className="text-center mb-10">
         <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', duration: 1 }}
-          className="text-6xl mb-4"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', duration: 0.8 }}
+          className="text-5xl mb-4"
         >
           🌟
         </motion.div>
@@ -62,7 +60,7 @@ export function AstroResultStep() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-2xl md:text-3xl font-bold gradient-text mb-3"
+          className="text-2xl md:text-3xl font-heading text-white mb-3"
         >
           Ваша натальна карта
         </motion.h2>
@@ -70,7 +68,7 @@ export function AstroResultStep() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-text-secondary"
+          className="text-white/60 font-light"
         >
           Ось що розповідають зірки про вас
         </motion.p>
@@ -87,14 +85,14 @@ export function AstroResultStep() {
               variants={cardVariants}
               initial="hidden"
               animate="visible"
-              className="glass rounded-2xl p-5 flex items-center gap-4"
+              className="bg-white/5 border border-white/10 rounded-2xl p-5 flex items-center gap-4"
             >
-              <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center text-3xl">
+              <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl">
                 {sign.icon}
               </div>
               <div className="flex-1">
-                <p className="text-sm text-text-secondary">{sign.label}</p>
-                <p className="text-xl font-bold text-text-primary flex items-center gap-2">
+                <p className="text-xs uppercase tracking-widest text-white/40 mb-1">{sign.label}</p>
+                <p className="text-xl font-heading text-white flex items-center gap-2">
                   <span className="text-2xl">{info.icon}</span>
                   {sign.value}
                   <span className="text-lg">{info.element}</span>
@@ -109,9 +107,9 @@ export function AstroResultStep() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8 }}
-        className="glass rounded-2xl p-4 mb-8"
+        className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8"
       >
-        <p className="text-center text-sm text-text-secondary">
+        <p className="text-center text-sm text-white/60 font-light">
           ✨ Ваша унікальна комбінація знаків дуже рідкісна! 
           Продовжіть, щоб дізнатись більше.
         </p>
@@ -133,4 +131,3 @@ export function AstroResultStep() {
     </motion.div>
   );
 }
-

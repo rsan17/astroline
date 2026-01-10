@@ -19,20 +19,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         className="w-full"
       >
         {label && (
-          <label className="block text-sm text-text-secondary mb-2">
+          <label className="block text-xs uppercase tracking-widest text-white/40 mb-2">
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
               {icon}
             </span>
           )}
           <input
             ref={ref}
             className={cn(
-              'input-default',
+              'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:border-accent/50 focus:ring-1 focus:ring-accent/20 focus:outline-none transition-all duration-300 font-light',
               icon && 'pl-12',
               error && 'border-error focus:border-error focus:ring-error/20',
               className
@@ -55,4 +55,3 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 );
 
 Input.displayName = 'Input';
-

@@ -52,19 +52,19 @@ export function ElementStep() {
       exit={{ opacity: 0, y: -20 }}
       className="w-full max-w-md mx-auto"
     >
-      <div className="text-center mb-8">
+      <div className="text-center mb-10">
         <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
           transition={{ type: 'spring', duration: 0.8 }}
-          className="text-5xl mb-4"
+          className="text-4xl mb-4"
         >
           ✨
         </motion.div>
-        <h2 className="text-2xl md:text-3xl font-bold gradient-text mb-3">
+        <h2 className="text-2xl md:text-3xl font-heading text-white mb-3">
           Який елемент вас притягує?
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-white/60 font-light">
           Оберіть той, з яким відчуваєте найбільший зв'язок
         </p>
       </div>
@@ -79,30 +79,29 @@ export function ElementStep() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.05, y: -5 }}
+              whileHover={{ scale: 1.02, y: -3 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleSelect(option.value)}
               className={cn(
                 'relative overflow-hidden rounded-2xl p-5 text-left transition-all duration-300',
                 'bg-gradient-to-br',
                 option.gradient,
-                isSelected && 'ring-4 ring-white/50 shadow-glow-lg'
+                isSelected && 'ring-2 ring-white/50'
               )}
             >
               <motion.span 
-                className="text-4xl block mb-2"
+                className="text-3xl block mb-2"
                 animate={isSelected ? { 
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 10, -10, 0]
+                  scale: [1, 1.1, 1],
                 } : {}}
                 transition={{ duration: 0.5 }}
               >
                 {option.icon}
               </motion.span>
-              <span className="text-lg font-bold text-white block">
+              <span className="text-lg font-heading text-white block">
                 {option.label}
               </span>
-              <span className="text-xs text-white/80 block mt-1">
+              <span className="text-xs text-white/70 block mt-1 font-light">
                 {option.description}
               </span>
               
@@ -133,4 +132,3 @@ export function ElementStep() {
     </motion.div>
   );
 }
-

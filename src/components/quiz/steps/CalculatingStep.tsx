@@ -39,15 +39,13 @@ export function CalculatingStep() {
       
       // Calculate sun sign from birth date
       const calculatedSunSign = data.birthDate 
-        ? calculateZodiacSignFromDate(data.birthDate) || 'Лев' // fallback only if date missing or invalid
-        : 'Лев'; // fallback only if date missing
+        ? calculateZodiacSignFromDate(data.birthDate) || 'Лев'
+        : 'Лев';
       
-      // Use calculated sun sign as placeholder for moon and rising signs
-      // (proper calculation requires ephemeris data and birth coordinates)
       updateData({
         sunSign: calculatedSunSign,
-        moonSign: calculatedSunSign, // placeholder until proper calculation
-        risingSign: calculatedSunSign, // placeholder until proper calculation
+        moonSign: calculatedSunSign,
+        risingSign: calculatedSunSign,
       });
       nextStep();
     }, 5000);
@@ -67,7 +65,7 @@ export function CalculatingStep() {
       className="w-full max-w-md mx-auto text-center"
     >
       {/* Animated zodiac wheel */}
-      <div className="relative w-48 h-48 mx-auto mb-8">
+      <div className="relative w-48 h-48 mx-auto mb-10">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
@@ -81,14 +79,14 @@ export function CalculatingStep() {
             return (
               <motion.span
                 key={sign}
-                className="absolute text-2xl"
+                className="absolute text-2xl text-white/40"
                 style={{
                   left: `calc(50% + ${x}px - 12px)`,
                   top: `calc(50% + ${y}px - 12px)`,
                 }}
                 animate={{ 
-                  opacity: [0.3, 1, 0.3],
-                  scale: [0.8, 1.1, 0.8]
+                  opacity: [0.2, 0.8, 0.2],
+                  scale: [0.9, 1.1, 0.9]
                 }}
                 transition={{ 
                   duration: 2, 
@@ -102,21 +100,21 @@ export function CalculatingStep() {
           })}
         </motion.div>
 
-        {/* Center glow */}
+        {/* Center glow - subtle */}
         <motion.div
           animate={{ 
             scale: [1, 1.2, 1],
-            opacity: [0.5, 1, 0.5]
+            opacity: [0.2, 0.4, 0.2]
           }}
           transition={{ duration: 2, repeat: Infinity }}
-          className="absolute inset-0 m-auto w-20 h-20 rounded-full bg-accent/30 blur-xl"
+          className="absolute inset-0 m-auto w-20 h-20 rounded-full bg-accent/20 blur-xl"
         />
         
         {/* Center icon */}
         <motion.div
-          animate={{ scale: [0.9, 1.1, 0.9] }}
+          animate={{ scale: [0.95, 1.05, 0.95] }}
           transition={{ duration: 1.5, repeat: Infinity }}
-          className="absolute inset-0 flex items-center justify-center text-5xl"
+          className="absolute inset-0 flex items-center justify-center text-4xl"
         >
           {loadingMessages[currentMessage].icon}
         </motion.div>
@@ -130,7 +128,7 @@ export function CalculatingStep() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="text-lg text-text-primary"
+            className="text-lg text-white/80 font-light"
           >
             {loadingMessages[currentMessage].text}
           </motion.p>
@@ -139,24 +137,23 @@ export function CalculatingStep() {
 
       {/* Progress bar */}
       <div className="w-full max-w-xs mx-auto">
-        <div className="progress-bar">
+        <div className="h-1 bg-white/10 rounded-full overflow-hidden">
           <motion.div
-            className="progress-fill"
+            className="h-full bg-accent"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="text-sm text-text-muted mt-2">{progress}%</p>
+        <p className="text-xs text-white/40 mt-3 uppercase tracking-widest">{progress}%</p>
       </div>
 
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
-        className="text-sm text-text-secondary mt-8"
+        className="text-sm text-white/40 mt-8 font-light"
       >
         Це займе лише кілька секунд...
       </motion.p>
     </motion.div>
   );
 }
-
