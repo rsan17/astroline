@@ -153,21 +153,21 @@ export function PaywallStep() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="w-full max-w-lg mx-auto"
+      className="w-full max-w-lg mx-auto px-1 sm:px-0"
     >
-      <div className="text-center mb-8">
+      <div className="text-center mb-6 sm:mb-8">
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring' }}
-          className="text-5xl mb-4"
+          className="text-4xl sm:text-5xl mb-3 sm:mb-4"
         >
           🎉
         </motion.div>
-        <h2 className="text-2xl md:text-3xl font-bold gradient-text mb-3">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold gradient-text mb-2 sm:mb-3">
           Ваш звіт готовий!
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-sm sm:text-base text-text-secondary">
           Оберіть план, щоб отримати повний доступ
         </p>
       </div>
@@ -190,7 +190,7 @@ export function PaywallStep() {
       </motion.div>
 
       {/* Pricing cards */}
-      <div className="space-y-4 mb-8">
+      <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
         {plans.map((plan, index) => (
           <motion.button
             key={plan.id}
@@ -199,7 +199,7 @@ export function PaywallStep() {
             transition={{ delay: 0.3 + index * 0.1 }}
             onClick={() => setSelectedPlan(plan.id)}
             className={cn(
-              'w-full glass rounded-2xl p-5 text-left transition-all duration-300 relative overflow-hidden',
+              'w-full glass rounded-2xl p-4 sm:p-5 text-left transition-all duration-300 relative overflow-hidden',
               selectedPlan === plan.id && 'ring-2 ring-accent border-accent/50',
               plan.popular && 'border-accent/30'
             )}
@@ -213,9 +213,9 @@ export function PaywallStep() {
               </span>
             )}
 
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-3 sm:gap-4">
               <div className={cn(
-                'w-12 h-12 rounded-xl flex items-center justify-center',
+                'w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0',
                 selectedPlan === plan.id 
                   ? 'bg-accent text-background' 
                   : 'bg-white/10 text-text-secondary'
@@ -223,44 +223,44 @@ export function PaywallStep() {
                 {plan.icon}
               </div>
 
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-lg font-bold text-text-primary">
+                  <span className="text-base sm:text-lg font-bold text-text-primary">
                     {plan.name}
                   </span>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-accent">
+                <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
+                  <span className="text-xl sm:text-2xl font-bold text-accent">
                     {plan.price}
                   </span>
                   {plan.originalPrice && (
-                    <span className="text-sm text-text-muted line-through">
+                    <span className="text-xs sm:text-sm text-text-muted line-through">
                       {plan.originalPrice}
                     </span>
                   )}
-                  <span className="text-sm text-text-secondary">
+                  <span className="text-xs sm:text-sm text-text-secondary">
                     {plan.period}
                   </span>
                 </div>
               </div>
 
               <div className={cn(
-                'w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0',
+                'w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0',
                 selectedPlan === plan.id 
                   ? 'border-accent bg-accent' 
                   : 'border-white/30'
               )}>
                 {selectedPlan === plan.id && (
-                  <Check className="w-4 h-4 text-background" />
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-background" />
                 )}
               </div>
             </div>
 
             {/* Features */}
-            <div className="mt-4 pl-16 space-y-2">
+            <div className="mt-4 pl-0 sm:pl-16 space-y-2">
               {plan.features.map((feature, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm text-text-secondary">
-                  <Check className="w-4 h-4 text-accent flex-shrink-0" />
+                <div key={i} className="flex items-center gap-2 text-xs sm:text-sm text-text-secondary">
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4 text-accent flex-shrink-0" />
                   {feature}
                 </div>
               ))}
@@ -312,7 +312,7 @@ export function PaywallStep() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.9 }}
-        className="flex items-center justify-center gap-6 mt-8 text-xs text-text-muted"
+        className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-6 sm:mt-8 text-xs text-text-muted"
       >
         <span className="flex items-center gap-1">
           🔒 Безпечна оплата
@@ -321,7 +321,7 @@ export function PaywallStep() {
           💳 Stripe
         </span>
         <span className="flex items-center gap-1">
-          ↩️ Гарантія повернення
+          ↩️ Гарантія
         </span>
       </motion.div>
     </motion.div>

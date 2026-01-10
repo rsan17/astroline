@@ -59,7 +59,7 @@ const itemVariants = {
 
 export function Features() {
   return (
-    <section className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative">
+    <section id="features" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/5 to-transparent pointer-events-none" />
 

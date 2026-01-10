@@ -91,13 +91,13 @@ export default function LandingPage() {
       </main>
 
       {/* Footer with sitemap links - responsive grid */}
-      <footer className="border-t border-white/10 py-10 md:py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="border-t border-white/10 py-8 sm:py-10 md:py-12 px-3 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
             {/* Brand - full width on mobile, 2 cols on sm, 1 col on lg */}
             <div className="sm:col-span-2 lg:col-span-1 text-center sm:text-left">
-              <h3 className="text-xl font-bold gradient-text mb-4">✨ Astroline</h3>
-              <p className="text-text-secondary text-sm max-w-md mx-auto sm:mx-0">
+              <h3 className="text-lg sm:text-xl font-bold gradient-text mb-3 sm:mb-4">✨ Astroline</h3>
+              <p className="text-text-secondary text-xs sm:text-sm max-w-md mx-auto sm:mx-0">
                 Ваш персональний астрологічний гід. Відкрийте таємниці вашої долі 
                 з персоналізованими звітами та прогнозами.
               </p>
@@ -105,8 +105,8 @@ export default function LandingPage() {
 
             {/* Zodiac Links - merged into single column with 2-col internal grid */}
             <div className="sm:col-span-2 lg:col-span-2 text-center sm:text-left">
-              <h4 className="font-semibold text-text-primary mb-4">Знаки зодіаку</h4>
-              <ul className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+              <h4 className="font-semibold text-text-primary mb-3 sm:mb-4">Знаки зодіаку</h4>
+              <ul className="grid grid-cols-2 gap-x-3 sm:gap-x-6 lg:gap-x-8 gap-y-1.5 sm:gap-y-2 text-xs sm:text-sm">
                 {ZODIAC_SIGNS.map((sign) => (
                   <li key={sign.slug}>
                     <Link
@@ -122,8 +122,8 @@ export default function LandingPage() {
 
             {/* Product Links */}
             <div className="text-center sm:text-left">
-              <h4 className="font-semibold text-text-primary mb-4">Продукт</h4>
-              <ul className="space-y-2 text-sm">
+              <h4 className="font-semibold text-text-primary mb-3 sm:mb-4">Продукт</h4>
+              <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
                 <li>
                   <Link href="/quiz" className="text-text-secondary hover:text-accent transition-colors">
                     Пройти квіз
@@ -159,14 +159,14 @@ export default function LandingPage() {
           </div>
 
           {/* Bottom bar - centered on mobile */}
-          <div className="pt-8 border-t border-white/10 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-            <p className="text-text-muted text-sm text-center sm:text-left">
+          <div className="pt-6 sm:pt-8 border-t border-white/10 flex flex-col items-center gap-3 sm:gap-4 sm:flex-row sm:justify-between">
+            <p className="text-text-muted text-xs sm:text-sm text-center sm:text-left">
               © 2026 Astroline. Усі права захищені.
             </p>
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-text-muted text-sm">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-4 text-text-muted text-xs sm:text-sm">
               <span>🔒 Безпечна оплата</span>
               <span>💳 Stripe</span>
-              <span>🇺🇦 Зроблено в Україні</span>
+              <span>🇺🇦 Україна</span>
             </div>
           </div>
         </div>

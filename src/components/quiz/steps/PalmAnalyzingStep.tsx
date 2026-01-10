@@ -13,11 +13,19 @@ const analysisSteps = [
 ];
 
 export function PalmAnalyzingStep() {
-  const { nextStep, updateData } = useQuizStore();
+  const { nextStep, updateData, data } = useQuizStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
 
+  // If palm step was skipped, go directly to next step without animation
+  const wasSkipped = data.palmImageUrl === 'skipped';
+
   useEffect(() => {
+    if (wasSkipped) {
+      nextStep();
+      return;
+    }
+
     // Rotate through analysis steps
     const stepInterval = setInterval(() => {
       setCurrentStep(prev => (prev + 1) % analysisSteps.length);
@@ -47,7 +55,7 @@ export function PalmAnalyzingStep() {
       clearInterval(progressInterval);
       clearTimeout(timeout);
     };
-  }, [nextStep, updateData]);
+  }, [nextStep, updateData, wasSkipped]);
 
   return (
     <motion.div

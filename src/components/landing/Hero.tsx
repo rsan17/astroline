@@ -33,7 +33,7 @@ const ZODIAC_SYMBOLS = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', 
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-3 sm:px-6 lg:px-8 pt-24 pb-16 sm:pt-28 sm:pb-20 lg:pt-32 lg:pb-24">
       {/* Animated background elements */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Large glowing orbs - reduced size on mobile */}
@@ -123,8 +123,8 @@ export function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="font-bold mb-6 leading-tight"
-          style={{ fontSize: 'clamp(2rem, 5vw + 1rem, 4rem)' }}
+          className="font-bold mb-6 leading-tight px-2 sm:px-0"
+          style={{ fontSize: 'clamp(1.75rem, 4vw + 0.5rem, 3.5rem)' }}
         >
           Відкрийте таємниці{' '}
           <span className="gradient-text">вашої долі</span>{' '}
@@ -136,7 +136,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-base sm:text-lg md:text-xl text-text-secondary mb-10 max-w-2xl mx-auto"
+          className="text-sm sm:text-base md:text-lg lg:text-xl text-text-secondary mb-8 sm:mb-10 max-w-2xl mx-auto px-2 sm:px-0"
         >
           Персоналізований астрологічний звіт з аналізом натальної карти, 
           прогнозом на 2026 рік та унікальним читанням долоні
@@ -153,10 +153,10 @@ export function Hero() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
-              className="btn-primary text-lg px-10 py-5 flex items-center justify-center gap-3 w-full sm:w-auto"
+              className="btn-primary text-base sm:text-lg px-6 py-4 sm:px-10 sm:py-5 flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto"
             >
               Почати безкоштовний тест
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </motion.button>
           </Link>
           <span className="text-text-muted text-sm">
@@ -169,7 +169,7 @@ export function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="flex items-center justify-center gap-3 mt-16 text-3xl opacity-40 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-4 -mx-4 md:overflow-visible"
+          className="flex items-center justify-center gap-2 sm:gap-3 mt-12 sm:mt-16 text-2xl sm:text-3xl opacity-40 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-2 -mx-2 md:overflow-visible"
         >
           {ZODIAC_SYMBOLS.map((symbol, i) => (
             <motion.span

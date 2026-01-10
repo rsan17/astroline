@@ -59,7 +59,7 @@ export function Testimonials() {
   };
 
   return (
-    <section className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <section id="testimonials" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[600px] h-[400px] md:h-[600px] rounded-full opacity-10 blur-3xl bg-gradient-to-br from-accent to-purple-500 pointer-events-none" />
 
@@ -78,8 +78,8 @@ export function Testimonials() {
           </h2>
         </motion.div>
 
-        {/* Testimonial carousel with group for hover */}
-        <div className="relative group">
+        {/* Testimonial carousel */}
+        <div className="relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -130,43 +130,47 @@ export function Testimonials() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation arrows - always visible on mobile, hover on desktop */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={prev}
-            className="absolute left-2 sm:-left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full glass flex items-center justify-center hover:border-accent/50 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
-            aria-label="Попередній відгук"
-          >
-            <ChevronLeft className="w-5 h-5 text-text-secondary" />
-          </motion.button>
+          {/* Navigation controls - arrows and dots */}
+          <div className="flex items-center justify-center gap-4 mt-6 sm:mt-8">
+            {/* Previous button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={prev}
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass flex items-center justify-center hover:border-accent/50 transition-all"
+              aria-label="Попередній відгук"
+            >
+              <ChevronLeft className="w-5 h-5 text-text-secondary" />
+            </motion.button>
 
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={next}
-            className="absolute right-2 sm:-right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full glass flex items-center justify-center hover:border-accent/50 transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
-            aria-label="Наступний відгук"
-          >
-            <ChevronRight className="w-5 h-5 text-text-secondary" />
-          </motion.button>
+            {/* Navigation dots */}
+            <div className="flex items-center gap-3">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentIndex(i)}
+                  className="p-2 -m-1"
+                  aria-label={`Перейти до відгуку ${i + 1}`}
+                >
+                  <span
+                    className={`block w-3 h-3 sm:w-2 sm:h-2 rounded-full transition-all duration-300 ${
+                      i === currentIndex ? 'bg-accent w-6 sm:w-6' : 'bg-white/20 hover:bg-white/40'
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
 
-          {/* Navigation dots with larger touch targets */}
-          <div className="flex justify-center gap-3 mt-6 sm:mt-8">
-            {testimonials.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentIndex(i)}
-                className="p-2 -m-1"
-                aria-label={`Перейти до відгуку ${i + 1}`}
-              >
-                <span
-                  className={`block w-3 h-3 sm:w-2 sm:h-2 rounded-full transition-all duration-300 ${
-                    i === currentIndex ? 'bg-accent w-6 sm:w-6' : 'bg-white/20 hover:bg-white/40'
-                  }`}
-                />
-              </button>
-            ))}
+            {/* Next button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={next}
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass flex items-center justify-center hover:border-accent/50 transition-all"
+              aria-label="Наступний відгук"
+            >
+              <ChevronRight className="w-5 h-5 text-text-secondary" />
+            </motion.button>
           </div>
         </div>
       </div>

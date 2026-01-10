@@ -2,23 +2,22 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
-import { Input } from '@/components/ui/Input';
+import { CityAutocomplete } from '@/components/ui/CityAutocomplete';
 import { Button } from '@/components/ui/Button';
 
 export function BirthPlaceStep() {
   const { data, updateData, nextStep, prevStep } = useQuizStore();
   const [error, setError] = useState('');
 
-  const handlePlaceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateData({ birthPlace: e.target.value });
+  const handlePlaceChange = (value: string) => {
+    updateData({ birthPlace: value });
     setError('');
   };
 
   const validateAndContinue = () => {
     if (!data.birthPlace || data.birthPlace.trim().length < 2) {
-      setError('Будь ласка, введіть місце народження');
+      setError('Будь ласка, оберіть місце народження зі списку');
       return;
     }
     nextStep();
@@ -48,17 +47,14 @@ export function BirthPlaceStep() {
       </div>
 
       <div className="glass rounded-2xl p-6 mb-8">
-        <Input
-          type="text"
+        <CityAutocomplete
           value={data.birthPlace || ''}
           onChange={handlePlaceChange}
-          placeholder="Наприклад: Київ, Україна"
-          icon={<MapPin className="w-5 h-5" />}
+          placeholder="Почніть вводити назву міста..."
           error={error}
-          autoComplete="off"
         />
         <p className="text-xs text-text-muted mt-3">
-          Введіть місто та країну
+          Введіть назву міста та оберіть зі списку
         </p>
       </div>
 
