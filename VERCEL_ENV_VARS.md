@@ -47,10 +47,29 @@ This document lists all environment variables needed for the Astroline deploymen
   - For testing, you can use Resend's test domain: `onboarding@resend.dev`
   - For production, verify your domain in Resend → Domains
 
-## Optional Variables (for AI Features)
+## Required for Palm Validation
+
+### `GOOGLE_GENERATIVE_AI_API_KEY`
+- **Description**: API key for Google Gemini (used for palm photo validation AND AI reports)
+- **How to get**:
+  1. Go to https://aistudio.google.com/app/apikey
+  2. Sign in with Google account
+  3. Create a new API key
+  4. Copy the key
+- **Example**: `AIzaSy1234567890abcdef`
+- **Where it's used**: 
+  - `src/app/api/validate-palm/route.ts` - **REQUIRED for palm photo validation**
+  - `src/lib/ai/astro-report.ts` - fallback AI provider for reports
+- **Environments**: Production, Preview, Development
+- **⚠️ IMPORTANT**: 
+  - **Required for palm validation to work!** Without this key, users cannot validate their palm photos
+  - Also used as fallback AI provider for reports if Groq fails
+  - Free tier: ~1500 requests/day
+
+## Optional Variables (for AI Reports)
 
 ### `GROQ_API_KEY`
-- **Description**: API key for Groq (primary AI provider)
+- **Description**: API key for Groq (primary AI provider for reports)
 - **How to get**:
   1. Sign up at https://console.groq.com
   2. Go to https://console.groq.com/keys
@@ -62,31 +81,17 @@ This document lists all environment variables needed for the Astroline deploymen
 - **Note**: 
   - App will work with static report templates if not provided
   - Groq is faster and has higher rate limits than Gemini
-  - Recommended as primary AI provider
-
-### `GOOGLE_GENERATIVE_AI_API_KEY`
-- **Description**: API key for Google Gemini (fallback AI provider)
-- **How to get**:
-  1. Go to https://aistudio.google.com/app/apikey
-  2. Sign in with Google account
-  3. Create a new API key
-  4. Copy the key
-- **Example**: `AIzaSy1234567890abcdef`
-- **Where it's used**: `src/lib/ai/astro-report.ts` (fallback if Groq fails)
-- **Environments**: Production, Preview, Development
-- **Note**: 
-  - App will work with static report templates if not provided
-  - Used as fallback if Groq API is unavailable
-  - At least one AI key is recommended for enhanced reports
+  - Recommended as primary AI provider for reports
 
 ## Variable Priority
 
 The app will work with the following priority:
 
-1. **AI Reports**: If `GROQ_API_KEY` or `GOOGLE_GENERATIVE_AI_API_KEY` is set → AI-generated reports
-2. **Static Reports**: If no AI keys → Static template reports (still functional)
-3. **Email**: If `RESEND_API_KEY` and `EMAIL_FROM` are set → Email sending works
-4. **No Email**: If Resend keys not set → Email functionality disabled (reports still accessible via URL)
+1. **Palm Validation**: `GOOGLE_GENERATIVE_AI_API_KEY` is **REQUIRED** for palm photo validation to work
+2. **AI Reports**: If `GROQ_API_KEY` is set → Groq for AI-generated reports; if not → falls back to Gemini
+3. **Static Reports**: If no AI keys → Static template reports (still functional, but no palm validation)
+4. **Email**: If `RESEND_API_KEY` and `EMAIL_FROM` are set → Email sending works
+5. **No Email**: If Resend keys not set → Email functionality disabled (reports still accessible via URL)
 
 ## Testing Environment Variables
 
@@ -120,8 +125,16 @@ After adding variables, you can test them:
 - Verify `EMAIL_FROM` format: `Name <email@domain.com>`
 - Check Vercel function logs for errors
 
-### AI not working?
-- Verify at least one AI API key is set
+### Palm validation not working?
+- **Most common issue**: `GOOGLE_GENERATIVE_AI_API_KEY` is not set in Vercel
+- Verify the key starts with `AIzaSy`
+- Check Vercel function logs: Deployments → Functions → validate-palm → View logs
+- Look for "GOOGLE_GENERATIVE_AI_API_KEY is not configured" error
+- Verify API key is valid at https://aistudio.google.com/app/apikey
+- Make sure key has quota available (free tier: 1500 requests/day)
+
+### AI reports not working?
+- Verify at least one AI API key is set (`GROQ_API_KEY` or `GOOGLE_GENERATIVE_AI_API_KEY`)
 - Check API key format (Groq starts with `gsk_`, Google starts with `AIzaSy`)
 - Check Vercel function logs for API errors
 - Verify API keys are valid and have credits/quota

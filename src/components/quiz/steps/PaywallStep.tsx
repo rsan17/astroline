@@ -182,6 +182,9 @@ export function PaywallStep() {
           planId: selectedPlan,
           reportId: reportId,
           email: data.email,
+          sunSign: data.sunSign,
+          moonSign: data.moonSign,
+          risingSign: data.risingSign,
         }),
       });
 

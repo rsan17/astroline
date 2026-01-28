@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { monobank, PRICE_PLANS, type PlanId } from '@/lib/monobank';
+import { createPayment } from '@/lib/payment-store';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { planId, reportId, email } = body;
+    const { planId, reportId, email, sunSign, moonSign, risingSign } = body;
 
     // Validate required fields
     if (!planId || !reportId) {
@@ -70,6 +71,25 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Invoice created: ${invoice.invoiceId}`);
     console.log(`🔗 Payment URL: ${invoice.pageUrl}`);
+
+    // Store payment data in Supabase for email sending after successful payment
+    const dbResult = await createPayment(reference, {
+      email,
+      reportId,
+      sunSign,
+      moonSign,
+      risingSign,
+      planId,
+      amount: plan.priceKopecks,
+      invoiceId: invoice.invoiceId,
+    });
+
+    if (dbResult.success) {
+      console.log(`📧 Payment data stored in database for reference: ${reference}`);
+    } else {
+      console.warn(`⚠️ Could not store payment in database: ${dbResult.error}`);
+    }
+
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     return NextResponse.json({

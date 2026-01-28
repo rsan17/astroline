@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { MonobankWebhookPayload } from '@/lib/monobank';
-import { paymentStatuses } from '@/lib/payment-store';
+import { getPaymentByReference, updatePaymentStatus, getPaymentStatus } from '@/lib/payment-store';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,52 +18,80 @@ export async function POST(request: NextRequest) {
       console.log(`❌ Failure reason: ${payload.failureReason}`);
     }
 
-    // Extract reportId from reference (format: ASTRO-{reportId}-{timestamp})
-    let reportId: string | undefined;
-    if (payload.reference) {
-      const parts = payload.reference.split('-');
-      if (parts.length >= 2 && parts[0] === 'ASTRO') {
-        reportId = parts[1];
-      }
-    }
-
-    // Store payment status (in production, save to database)
-    if (payload.reference) {
-      paymentStatuses.set(payload.reference, {
-        status: payload.status,
-        reportId,
-        invoiceId: payload.invoiceId,
-        amount: payload.amount,
-        modifiedDate: payload.modifiedDate,
-      });
-    }
-
     // Handle different payment statuses
     switch (payload.status) {
       case 'success':
         console.log('✅ Payment successful!');
-        // In production: Update database, unlock report, send confirmation email
-        // Example: await supabase.from('payments').update({ status: 'paid' }).eq('reference', payload.reference);
+        
+        // Get payment data from database and send confirmation email
+        if (payload.reference) {
+          const payment = await getPaymentByReference(payload.reference);
+          
+          if (payment?.email) {
+            try {
+              const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://astrolog.cards';
+              const response = await fetch(`${baseUrl}/api/send-report`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  email: payment.email,
+                  reportId: payment.report_id,
+                  sunSign: payment.sun_sign,
+                  moonSign: payment.moon_sign,
+                  risingSign: payment.rising_sign,
+                }),
+              });
+              
+              if (response.ok) {
+                console.log(`📧 Confirmation email sent to ${payment.email}`);
+              } else {
+                console.error('❌ Failed to send email:', await response.text());
+              }
+            } catch (emailError) {
+              console.error('❌ Email sending error:', emailError);
+            }
+          } else {
+            console.log('⚠️ No email found for this payment reference');
+          }
+
+          // Update payment status in database
+          await updatePaymentStatus(payload.reference, 'success', payload.invoiceId);
+        }
         break;
 
       case 'failure':
         console.log('❌ Payment failed');
+        if (payload.reference) {
+          await updatePaymentStatus(payload.reference, 'failed', payload.invoiceId);
+        }
         break;
 
       case 'processing':
         console.log('⏳ Payment processing...');
+        if (payload.reference) {
+          await updatePaymentStatus(payload.reference, 'processing', payload.invoiceId);
+        }
         break;
 
       case 'hold':
         console.log('🔒 Payment on hold');
+        if (payload.reference) {
+          await updatePaymentStatus(payload.reference, 'hold', payload.invoiceId);
+        }
         break;
 
       case 'reversed':
         console.log('↩️ Payment reversed/refunded');
+        if (payload.reference) {
+          await updatePaymentStatus(payload.reference, 'reversed', payload.invoiceId);
+        }
         break;
 
       case 'expired':
         console.log('⏰ Invoice expired');
+        if (payload.reference) {
+          await updatePaymentStatus(payload.reference, 'expired', payload.invoiceId);
+        }
         break;
     }
 
@@ -88,7 +116,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Reference is required' }, { status: 400 });
   }
 
-  const paymentStatus = paymentStatuses.get(reference);
+  const paymentStatus = await getPaymentStatus(reference);
   
   if (!paymentStatus) {
     return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
