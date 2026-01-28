@@ -8,44 +8,19 @@ export default function PreLoader() {
   const [isFading, setIsFading] = useState(false);
 
   useEffect(() => {
-    const startTime = Date.now();
-    const minDisplayTime = 2000; // Мінімальний час показу: 2 секунди
+    // Простий та надійний підхід - завжди ховаємо через 3 секунди
+    const fadeTimer = setTimeout(() => {
+      setIsFading(true);
+    }, 3000);
 
-    // Hide loader after page is fully loaded
-    const handleLoad = () => {
-      const elapsed = Date.now() - startTime;
-      const remainingTime = Math.max(0, minDisplayTime - elapsed);
+    const hideTimer = setTimeout(() => {
+      setIsVisible(false);
+    }, 3500);
 
-      setTimeout(() => {
-        // Start fade out
-        setIsFading(true);
-        // Remove from DOM after fade animation completes
-        setTimeout(() => {
-          setIsVisible(false);
-        }, 500);
-      }, remainingTime);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
     };
-
-    // Перевіряємо стан завантаження
-    if (typeof window !== 'undefined') {
-      // Завжди показуємо loader мінімальний час, навіть якщо сторінка вже завантажена
-      // Це забезпечує, що користувач завжди побачить анімацію
-      if (document.readyState === 'complete') {
-        // Якщо сторінка вже завантажена, все одно показуємо loader мінімальний час
-        handleLoad();
-      } else {
-        window.addEventListener('load', handleLoad);
-        // Також додаємо fallback на випадок, якщо load event не спрацює
-        const timeout = setTimeout(() => {
-          handleLoad();
-        }, minDisplayTime + 1000);
-        
-        return () => {
-          window.removeEventListener('load', handleLoad);
-          clearTimeout(timeout);
-        };
-      }
-    }
   }, []);
 
   if (!isVisible) return null;

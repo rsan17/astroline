@@ -30,9 +30,9 @@ export async function POST(request: NextRequest) {
     const moon = zodiacSigns[moonSign || 'Риби'];
     const rising = zodiacSigns[risingSign || 'Скорпіон'];
 
-    // Build report URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://astroline.com';
-    const reportUrl = `${baseUrl}/report/${reportId}`;
+    // Build report URL - використовуємо astrolog.cards для email посилань
+    const emailBaseUrl = process.env.EMAIL_APP_URL || 'https://astrolog.cards';
+    const reportUrl = `${emailBaseUrl}/report/${reportId}`;
 
     // Send email via Resend
     const { data, error } = await resend.emails.send({

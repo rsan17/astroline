@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Star, Quote } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, Quote, MessageCircle } from 'lucide-react';
+import { useTranslations } from '@/lib/i18n';
 
 const testimonials = [
   {
@@ -49,32 +50,65 @@ const testimonials = [
 
 export function Testimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [autoPlay, setAutoPlay] = useState(true);
+  const { t } = useTranslations();
+
+  // Auto-rotate testimonials
+  useEffect(() => {
+    if (!autoPlay) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [autoPlay]);
 
   const next = () => {
+    setAutoPlay(false);
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
 
   const prev = () => {
+    setAutoPlay(false);
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
   return (
     <section id="testimonials" className="py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[600px] h-[400px] md:h-[600px] rounded-full opacity-10 blur-3xl bg-gradient-to-br from-accent to-purple-500 pointer-events-none" />
+      {/* Background effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] md:w-[600px] h-[400px] md:h-[600px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(78, 205, 196, 0.1) 0%, rgba(139, 92, 246, 0.05) 50%, transparent 70%)' }}
+          animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 8, repeat: Infinity }}
+        />
+      </div>
 
       <div className="max-w-4xl mx-auto relative z-10">
+        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-10 md:mb-12"
         >
+          <motion.div
+            initial={{ scale: 0 }}
+            whileInView={{ scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ type: 'spring', bounce: 0.5 }}
+            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-accent/20 to-purple-500/20 mb-6"
+          >
+            <MessageCircle className="w-7 h-7 text-accent" />
+          </motion.div>
+          
           <span className="text-accent text-sm font-medium uppercase tracking-wider mb-4 block">
-            Відгуки
+            {t.testimonials?.label || 'Відгуки'}
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Що кажуть <span className="gradient-text">наші користувачі</span>
+            {t.testimonials?.title || 'Що кажуть'}{' '}
+            <span className="gradient-text">{t.testimonials?.titleHighlight || 'наші користувачі'}</span>
           </h2>
         </motion.div>
 
@@ -83,10 +117,10 @@ export function Testimonials() {
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: 20, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.98 }}
+              transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
@@ -94,12 +128,18 @@ export function Testimonials() {
                 if (offset.x > 100 || velocity.x > 500) prev();
                 if (offset.x < -100 || velocity.x < -500) next();
               }}
-              className="glass rounded-3xl p-5 sm:p-6 md:p-8 lg:p-12 cursor-grab active:cursor-grabbing"
+              className="glass rounded-3xl p-5 sm:p-6 md:p-8 lg:p-12 cursor-grab active:cursor-grabbing border-accent/10 hover:border-accent/20 transition-colors"
             >
-              {/* Quote icon - responsive */}
-              <Quote className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-accent/30 mb-4 sm:mb-6" />
+              {/* Quote icon */}
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.2, type: 'spring', bounce: 0.4 }}
+              >
+                <Quote className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-accent/20 mb-4 sm:mb-6" />
+              </motion.div>
 
-              {/* Testimonial text - responsive */}
+              {/* Testimonial text */}
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-text-primary mb-6 sm:mb-8 leading-relaxed">
                 "{testimonials[currentIndex].text}"
               </p>
@@ -107,14 +147,17 @@ export function Testimonials() {
               {/* Author info */}
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3 sm:gap-4">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center text-xl sm:text-2xl">
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-accent/20 to-purple-500/20 flex items-center justify-center text-xl sm:text-2xl shadow-lg"
+                  >
                     {testimonials[currentIndex].avatar}
-                  </div>
+                  </motion.div>
                   <div>
                     <div className="font-semibold text-text-primary">
                       {testimonials[currentIndex].name}
                     </div>
-                    <div className="text-sm text-accent">
+                    <div className="text-sm text-accent font-medium">
                       {testimonials[currentIndex].sign}
                     </div>
                   </div>
@@ -123,50 +166,60 @@ export function Testimonials() {
                 {/* Rating */}
                 <div className="flex gap-1">
                   {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-yellow-400 text-yellow-400" />
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.3 + i * 0.1 }}
+                    >
+                      <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-gold text-gold" />
+                    </motion.div>
                   ))}
                 </div>
               </div>
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation controls - arrows and dots */}
+          {/* Navigation controls */}
           <div className="flex items-center justify-center gap-4 mt-6 sm:mt-8">
-            {/* Previous button */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={prev}
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass flex items-center justify-center hover:border-accent/50 transition-all"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass flex items-center justify-center hover:border-accent/50 hover:bg-white/5 transition-all"
               aria-label="Попередній відгук"
             >
               <ChevronLeft className="w-5 h-5 text-text-secondary" />
             </motion.button>
 
             {/* Navigation dots */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {testimonials.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => setCurrentIndex(i)}
-                  className="p-2 -m-1"
+                  onClick={() => {
+                    setAutoPlay(false);
+                    setCurrentIndex(i);
+                  }}
+                  className="p-1"
                   aria-label={`Перейти до відгуку ${i + 1}`}
                 >
-                  <span
-                    className={`block w-3 h-3 sm:w-2 sm:h-2 rounded-full transition-all duration-300 ${
-                      i === currentIndex ? 'bg-accent w-6 sm:w-6' : 'bg-white/20 hover:bg-white/40'
-                    }`}
+                  <motion.span
+                    animate={{
+                      width: i === currentIndex ? 24 : 8,
+                      backgroundColor: i === currentIndex ? 'rgb(78, 205, 196)' : 'rgba(255,255,255,0.2)',
+                    }}
+                    className="block h-2 rounded-full transition-all"
                   />
                 </button>
               ))}
             </div>
 
-            {/* Next button */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={next}
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass flex items-center justify-center hover:border-accent/50 transition-all"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full glass flex items-center justify-center hover:border-accent/50 hover:bg-white/5 transition-all"
               aria-label="Наступний відгук"
             >
               <ChevronRight className="w-5 h-5 text-text-secondary" />

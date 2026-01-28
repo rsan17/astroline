@@ -50,9 +50,23 @@ export function GoalsStep() {
         <h2 className="text-2xl md:text-3xl font-bold gradient-text mb-3">
           Що вас цікавить найбільше?
         </h2>
-        <p className="text-text-secondary">
-          Оберіть до {MAX_GOALS} варіантів
-        </p>
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20"
+        >
+          <motion.span
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+            className="text-lg"
+          >
+            ☝️
+          </motion.span>
+          <span className="text-sm font-medium text-accent">
+            Оберіть до {MAX_GOALS} варіантів
+          </span>
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-8">

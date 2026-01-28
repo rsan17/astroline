@@ -1,14 +1,32 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, Camera, Hand, X, RotateCcw, RefreshCw, Loader2, Settings, AlertCircle } from 'lucide-react';
+import { Upload, Camera, Hand, X, RotateCcw, RefreshCw, Loader2, Settings, AlertCircle, CheckCircle, XCircle, SkipForward } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
+import { usePalmDetection, type PalmDetectionResult } from '@/hooks/usePalmDetection';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
-type Mode = 'select' | 'camera' | 'preview';
+type Mode = 'select' | 'camera' | 'preview' | 'validating';
 type PermissionState = 'prompt' | 'granted' | 'denied' | 'unknown';
+
+interface ValidationResult {
+  isValid: boolean;
+  confidence: number;
+  feedback: string;
+  suggestions: string[];
+  details?: {
+    isOpenPalm: boolean;
+    isPalmVisible: boolean;
+    areLinesVisible: boolean;
+    isGoodLighting: boolean;
+    isPalmLargeEnough: boolean;
+  };
+  error?: string;
+  serviceUnavailable?: boolean;
+}
 
 export function PalmUploadStep() {
   const { updateData, nextStep, prevStep } = useQuizStore();
@@ -25,10 +43,45 @@ export function PalmUploadStep() {
   const [permissionState, setPermissionState] = useState<PermissionState>('unknown');
   const [showPermissionHelp, setShowPermissionHelp] = useState(false);
   
+  // Validation state
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const [palmDetection, setPalmDetection] = useState<PalmDetectionResult | null>(null);
+  const [serviceUnavailable, setServiceUnavailable] = useState(false);
+  
   // Refs
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  // Ref callback to handle video element mounting and attach stream
+  const videoRefCallback = useCallback((video: HTMLVideoElement | null) => {
+    videoRef.current = video;
+    if (video && streamRef.current) {
+      // Attach stream when video element mounts
+      if (video.srcObject !== streamRef.current) {
+        video.srcObject = streamRef.current;
+        video.play().catch((err) => {
+          console.error('Video autoplay error:', err);
+        });
+      }
+    }
+  }, []);
+
+  // Initialize palm detection hook
+  const {
+    isLoading: isPalmDetectionLoading,
+    error: palmDetectionError,
+    isReady: isPalmDetectionReady,
+    detectFromVideo,
+    detectFromDataUrl,
+    startContinuousDetection,
+    stopContinuousDetection,
+  } = usePalmDetection({
+    onDetection: (result) => {
+      setPalmDetection(result);
+    },
+  });
 
   // Check camera permission on mount
   useEffect(() => {
@@ -62,19 +115,28 @@ export function PalmUploadStep() {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
+      stopContinuousDetection();
     };
-  }, []);
+  }, [stopContinuousDetection]);
 
   // Stop camera when mode changes away from camera
   useEffect(() => {
     if (mode !== 'camera') {
       setIsCameraReady(false);
+      stopContinuousDetection();
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
       }
     }
-  }, [mode]);
+  }, [mode, stopContinuousDetection]);
+
+  // Start continuous palm detection when camera is ready
+  useEffect(() => {
+    if (mode === 'camera' && isCameraReady && videoRef.current && isPalmDetectionReady) {
+      startContinuousDetection(videoRef.current);
+    }
+  }, [mode, isCameraReady, isPalmDetectionReady, startContinuousDetection]);
 
   const startCamera = useCallback(async () => {
     // Check browser support
@@ -88,6 +150,7 @@ export function PalmUploadStep() {
       setCameraError(null);
       setShowPermissionHelp(false);
       setIsCameraReady(false);
+      setPalmDetection(null);
       
       // Stop any existing stream
       if (streamRef.current) {
@@ -131,6 +194,7 @@ export function PalmUploadStep() {
   }, [facingMode]);
 
   const stopCamera = useCallback(() => {
+    stopContinuousDetection();
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -138,7 +202,8 @@ export function PalmUploadStep() {
     setIsCameraReady(false);
     setMode('select');
     setCameraError(null);
-  }, []);
+    setPalmDetection(null);
+  }, [stopContinuousDetection]);
 
   // Handle video ready state
   const handleVideoCanPlay = useCallback(() => {
@@ -146,8 +211,56 @@ export function PalmUploadStep() {
     setIsCameraLoading(false);
   }, []);
 
-  const capturePhoto = useCallback(() => {
-    // Only capture if camera is ready
+  // Validate palm image with server
+  const validatePalmImage = async (imageDataUrl: string): Promise<ValidationResult> => {
+    try {
+      const response = await fetch('/api/validate-palm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: imageDataUrl }),
+      });
+
+      const data = await response.json();
+
+      // Check if service is unavailable
+      if (data.error === 'SERVICE_UNAVAILABLE' || data.serviceUnavailable) {
+        setServiceUnavailable(true);
+        return {
+          ...data,
+          serviceUnavailable: true,
+        };
+      }
+
+      if (!response.ok) {
+        // Check for AI service errors
+        if (data.error === 'AI_SERVICE_ERROR') {
+          setServiceUnavailable(true);
+          return {
+            ...data,
+            serviceUnavailable: true,
+          };
+        }
+        throw new Error('Validation request failed');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Palm validation error:', error);
+      setServiceUnavailable(true);
+      return {
+        isValid: false,
+        confidence: 0,
+        feedback: 'Сервіс перевірки тимчасово недоступний.',
+        suggestions: ['Ви можете пропустити цей крок або спробувати пізніше'],
+        serviceUnavailable: true,
+      };
+    }
+  };
+
+  const capturePhoto = useCallback(async () => {
+    // Only capture if camera is ready and palm is detected
     if (!isCameraReady || !videoRef.current || !canvasRef.current) return;
     
     const video = videoRef.current;
@@ -171,22 +284,41 @@ export function PalmUploadStep() {
     
     // Convert to data URL
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-    setPreview(dataUrl);
-    updateData({ palmImageUrl: dataUrl });
     
-    // Stop camera and go to preview
+    // Stop camera
+    stopContinuousDetection();
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
     setIsCameraReady(false);
-    setMode('preview');
-  }, [isCameraReady, updateData]);
+    
+    // Set preview and start validation
+    setPreview(dataUrl);
+    setMode('validating');
+    setIsValidating(true);
+    setValidationResult(null);
+    
+    // Validate with server
+    const result = await validatePalmImage(dataUrl);
+    setValidationResult(result);
+    setIsValidating(false);
+    
+    if (result.isValid) {
+      updateData({ palmImageUrl: dataUrl });
+      setMode('preview');
+    } else {
+      // Stay in validating mode to show error
+      setMode('validating');
+    }
+  }, [isCameraReady, updateData, stopContinuousDetection]);
 
   const switchCamera = useCallback(async () => {
     const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
     setFacingMode(newFacingMode);
     setIsCameraReady(false);
+    stopContinuousDetection();
+    setPalmDetection(null);
     
     // Restart camera with new facing mode
     if (streamRef.current) {
@@ -206,6 +338,9 @@ export function PalmUploadStep() {
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.play().catch((err) => {
+          console.error('Video play error on switch:', err);
+        });
       }
       // isCameraReady will be set to true by onCanPlay event
     } catch (error) {
@@ -214,22 +349,26 @@ export function PalmUploadStep() {
     } finally {
       setIsCameraLoading(false);
     }
-  }, [facingMode]);
+  }, [facingMode, stopContinuousDetection]);
 
   const handleRetake = useCallback(() => {
     setPreview(null);
     setIsCameraReady(false);
+    setValidationResult(null);
+    setPalmDetection(null);
     updateData({ palmImageUrl: undefined });
     startCamera();
   }, [startCamera, updateData]);
 
   const handleClearPreview = useCallback(() => {
     setPreview(null);
+    setValidationResult(null);
+    setPalmDetection(null);
     updateData({ palmImageUrl: undefined });
     setMode('select');
   }, [updateData]);
 
-  const handleFile = useCallback((file: File) => {
+  const handleFile = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
       alert('Будь ласка, завантажте зображення');
       return;
@@ -237,15 +376,30 @@ export function PalmUploadStep() {
 
     setIsUploading(true);
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const dataUrl = e.target?.result as string;
       setPreview(dataUrl);
-      updateData({ palmImageUrl: dataUrl });
+      setMode('validating');
+      setIsValidating(true);
+      setValidationResult(null);
       setIsUploading(false);
-      setMode('preview');
+      
+      // First do client-side palm detection
+      const clientResult = await detectFromDataUrl(dataUrl);
+      setPalmDetection(clientResult);
+      
+      // Then validate with server
+      const result = await validatePalmImage(dataUrl);
+      setValidationResult(result);
+      setIsValidating(false);
+      
+      if (result.isValid) {
+        updateData({ palmImageUrl: dataUrl });
+        setMode('preview');
+      }
     };
     reader.readAsDataURL(file);
-  }, [updateData]);
+  }, [updateData, detectFromDataUrl]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -268,12 +422,35 @@ export function PalmUploadStep() {
     if (file) handleFile(file);
   };
 
+  const handleContinue = () => {
+    if (validationResult?.isValid && preview) {
+      nextStep();
+    }
+  };
+
   const handleSkip = () => {
-    updateData({ palmImageUrl: 'skipped' });
+    // Clear any palm data and move to next step
+    updateData({ palmImageUrl: undefined });
     nextStep();
   };
 
-  const canContinue = !!preview;
+  const canContinue = validationResult?.isValid && preview;
+
+  // Determine palm detection status for camera view
+  const getPalmStatus = () => {
+    if (!palmDetection?.detected) {
+      return { status: 'none', message: 'Покажіть долоню' };
+    }
+    if (!palmDetection.isPalmOpen) {
+      return { status: 'partial', message: 'Розкрийте долоню повністю' };
+    }
+    if (!palmDetection.isPalmFacingCamera) {
+      return { status: 'partial', message: 'Поверніть долоню до камери' };
+    }
+    return { status: 'good', message: 'Відмінно! Зробіть фото' };
+  };
+
+  const palmStatus = getPalmStatus();
 
   return (
     <motion.div
@@ -295,12 +472,36 @@ export function PalmUploadStep() {
           Аналіз долоні
         </h2>
         <p className="text-text-secondary">
-          Завантажте фото вашої долоні для детального аналізу ліній долі
+          Завантажте чітке фото вашої <strong>відкритої долоні</strong> для детального аналізу ліній долі
         </p>
       </div>
 
       {/* Hidden canvas for capturing photos */}
       <canvas ref={canvasRef} className="hidden" />
+
+      {/* Palm detection loading indicator */}
+      {isPalmDetectionLoading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mb-4 p-3 rounded-lg bg-accent/10 border border-accent/30 text-sm text-center"
+        >
+          <Loader2 className="w-4 h-4 inline-block mr-2 animate-spin" />
+          Завантаження системи розпізнавання...
+        </motion.div>
+      )}
+
+      {/* Palm detection error */}
+      {palmDetectionError && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mb-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-sm text-center text-yellow-500"
+        >
+          <AlertCircle className="w-4 h-4 inline-block mr-2" />
+          {palmDetectionError}
+        </motion.div>
+      )}
 
       {/* Main content area */}
       <motion.div
@@ -368,7 +569,7 @@ export function PalmUploadStep() {
               {/* Video container */}
               <div className="relative aspect-[3/4] bg-black">
                 <video
-                  ref={videoRef}
+                  ref={videoRefCallback}
                   autoPlay
                   playsInline
                   muted
@@ -383,6 +584,23 @@ export function PalmUploadStep() {
                   </div>
                 )}
 
+                {/* Hand detection overlay */}
+                {palmDetection?.detected && palmDetection.palmBoundingBox && (
+                  <div 
+                    className={cn(
+                      "absolute border-2 rounded-xl transition-all duration-200",
+                      palmStatus.status === 'good' ? 'border-green-500' : 
+                      palmStatus.status === 'partial' ? 'border-yellow-500' : 'border-red-500'
+                    )}
+                    style={{
+                      left: `${palmDetection.palmBoundingBox.x * 100}%`,
+                      top: `${palmDetection.palmBoundingBox.y * 100}%`,
+                      width: `${palmDetection.palmBoundingBox.width * 100}%`,
+                      height: `${palmDetection.palmBoundingBox.height * 100}%`,
+                    }}
+                  />
+                )}
+
                 {/* Hand positioning guide overlay */}
                 <div className="absolute inset-0 pointer-events-none">
                   {/* Corner guides */}
@@ -391,10 +609,17 @@ export function PalmUploadStep() {
                   <div className="absolute bottom-24 left-8 w-16 h-16 border-b-2 border-l-2 border-accent/60 rounded-bl-xl" />
                   <div className="absolute bottom-24 right-8 w-16 h-16 border-b-2 border-r-2 border-accent/60 rounded-br-xl" />
                   
-                  {/* Instructions */}
+                  {/* Status message */}
                   <div className="absolute top-4 left-0 right-0 text-center">
-                    <span className="inline-block px-4 py-2 rounded-full bg-black/50 backdrop-blur-sm text-sm text-white">
-                      Розмістіть долоню в рамці
+                    <span className={cn(
+                      "inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-sm text-sm text-white",
+                      palmStatus.status === 'good' ? 'bg-green-500/70' :
+                      palmStatus.status === 'partial' ? 'bg-yellow-500/70' : 'bg-black/50'
+                    )}>
+                      {palmStatus.status === 'good' && <CheckCircle className="w-4 h-4" />}
+                      {palmStatus.status === 'partial' && <AlertCircle className="w-4 h-4" />}
+                      {palmStatus.status === 'none' && <Hand className="w-4 h-4" />}
+                      {palmStatus.message}
                     </span>
                   </div>
                 </div>
@@ -430,8 +655,10 @@ export function PalmUploadStep() {
                   disabled={!isCameraReady || isCameraLoading}
                   className={cn(
                     "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300",
-                    isCameraReady 
-                      ? "bg-gradient-to-r from-accent to-teal-500 shadow-glow cursor-pointer" 
+                    isCameraReady && palmStatus.status === 'good'
+                      ? "bg-gradient-to-r from-green-500 to-emerald-500 shadow-glow cursor-pointer" 
+                      : isCameraReady
+                      ? "bg-gradient-to-r from-accent to-teal-500 shadow-glow cursor-pointer"
                       : "bg-gray-600 cursor-not-allowed opacity-50"
                   )}
                 >
@@ -444,16 +671,18 @@ export function PalmUploadStep() {
                   </div>
                 </motion.button>
                 <p className="text-xs text-white/70">
-                  {isCameraReady ? 'Натисніть щоб зробити фото' : 'Камера завантажується...'}
+                  {!isCameraReady ? 'Камера завантажується...' :
+                   palmStatus.status === 'good' ? 'Натисніть щоб зробити фото' :
+                   'Розмістіть долоню правильно'}
                 </p>
               </div>
             </motion.div>
           )}
 
-          {/* PREVIEW MODE */}
-          {mode === 'preview' && preview && (
+          {/* VALIDATING MODE */}
+          {mode === 'validating' && preview && (
             <motion.div
-              key="preview"
+              key="validating"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -461,10 +690,118 @@ export function PalmUploadStep() {
               className="glass rounded-2xl overflow-hidden border-2 border-accent/30"
             >
               <div className="relative aspect-[3/4]">
-                <img
+                <Image
                   src={preview}
                   alt="Palm preview"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                
+                {/* Validation status */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute bottom-4 left-0 right-0 px-4"
+                >
+                  {isValidating ? (
+                    <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-black/50 backdrop-blur-sm">
+                      <Loader2 className="w-8 h-8 text-accent animate-spin" />
+                      <span className="text-white font-medium">Перевірка зображення...</span>
+                      <span className="text-white/60 text-sm">Аналізуємо якість долоні</span>
+                    </div>
+                  ) : validationResult && !validationResult.isValid ? (
+                    <div className={cn(
+                      "flex flex-col gap-3 p-4 rounded-xl backdrop-blur-sm border",
+                      validationResult.serviceUnavailable || serviceUnavailable
+                        ? "bg-yellow-500/20 border-yellow-500/30"
+                        : "bg-red-500/20 border-red-500/30"
+                    )}>
+                      <div className="flex items-center gap-2">
+                        {validationResult.serviceUnavailable || serviceUnavailable ? (
+                          <AlertCircle className="w-6 h-6 text-yellow-400" />
+                        ) : (
+                          <XCircle className="w-6 h-6 text-red-400" />
+                        )}
+                        <span className="text-white font-medium">{validationResult.feedback}</span>
+                      </div>
+                      {validationResult.suggestions.length > 0 && (
+                        <ul className="text-sm text-white/80 space-y-1">
+                          {validationResult.suggestions.map((suggestion, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <span className={validationResult.serviceUnavailable || serviceUnavailable ? "text-yellow-400" : "text-red-400"}>•</span>
+                              {suggestion}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ) : null}
+                </motion.div>
+              </div>
+
+              {/* Retry controls */}
+              {!isValidating && validationResult && !validationResult.isValid && (
+                <div className="p-4 flex flex-col items-center gap-3">
+                  <div className="flex justify-center gap-4">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleClearPreview}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20 hover:bg-white/15 transition-all"
+                    >
+                      <X className="w-4 h-4 text-text-secondary" />
+                      <span className="text-text-secondary text-sm">Скасувати</span>
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleRetake}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-accent/20 border border-accent/30 hover:bg-accent/30 transition-all"
+                    >
+                      <RotateCcw className="w-4 h-4 text-accent" />
+                      <span className="text-accent text-sm">Спробувати ще</span>
+                    </motion.button>
+                  </div>
+                  
+                  {/* Skip option when validation fails or service unavailable */}
+                  {(validationResult.serviceUnavailable || serviceUnavailable) && (
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSkip}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-yellow-500/20 border border-yellow-500/30 hover:bg-yellow-500/30 transition-all"
+                    >
+                      <SkipForward className="w-4 h-4 text-yellow-400" />
+                      <span className="text-yellow-400 text-sm">Пропустити і продовжити</span>
+                    </motion.button>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* PREVIEW MODE (validated successfully) */}
+          {mode === 'preview' && preview && (
+            <motion.div
+              key="preview"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="glass rounded-2xl overflow-hidden border-2 border-green-500/30"
+            >
+              <div className="relative aspect-[3/4]">
+                <Image
+                  src={preview}
+                  alt="Palm preview"
+                  fill
+                  className="object-cover"
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
                 
@@ -474,9 +811,19 @@ export function PalmUploadStep() {
                   animate={{ opacity: 1, y: 0 }}
                   className="absolute bottom-4 left-0 right-0 text-center"
                 >
-                  <span className="inline-block px-4 py-2 rounded-full bg-accent/20 backdrop-blur-sm text-accent font-medium">
-                    ✓ Фото готове
-                  </span>
+                  <div className="inline-flex flex-col items-center gap-2 px-6 py-3 rounded-xl bg-green-500/20 backdrop-blur-sm border border-green-500/30">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <span className="text-green-400 font-medium">
+                        {validationResult?.feedback || 'Фото готове до аналізу!'}
+                      </span>
+                    </div>
+                    {validationResult?.confidence && (
+                      <span className="text-xs text-white/60">
+                        Якість: {validationResult.confidence}%
+                      </span>
+                    )}
+                  </div>
                 </motion.div>
               </div>
 
@@ -579,8 +926,8 @@ export function PalmUploadStep() {
                         </p>
                         <ol className="text-xs text-text-muted space-y-1 list-decimal list-inside">
                           <li>Натисніть на іконку 🔒 зліва від адресної строки</li>
-                          <li>Знайдіть "Камера" або "Camera"</li>
-                          <li>Змініть на "Дозволити" або "Allow"</li>
+                          <li>Знайдіть &quot;Камера&quot; або &quot;Camera&quot;</li>
+                          <li>Змініть на &quot;Дозволити&quot; або &quot;Allow&quot;</li>
                           <li>Оновіть сторінку</li>
                         </ol>
                         
@@ -638,26 +985,47 @@ export function PalmUploadStep() {
         transition={{ delay: 0.4 }}
         className="glass rounded-xl p-4 mb-6"
       >
-        <p className="text-sm text-text-secondary text-center">
-          💡 Порада: розкрийте долоню і сфотографуйте її при хорошому освітленні
-        </p>
+        <div className="text-sm text-text-secondary space-y-2">
+          <p className="flex items-center gap-2">
+            <span className="text-lg">💡</span>
+            <span><strong>Порада:</strong> Розкрийте долоню повністю і сфотографуйте при хорошому освітленні</span>
+          </p>
+          <p className="flex items-center gap-2 text-xs text-text-muted">
+            <span className="text-lg">✋</span>
+            <span>Лінії долоні мають бути чітко видимі для точного аналізу</span>
+          </p>
+        </div>
       </motion.div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col items-center gap-4">
         <div className="flex gap-4 justify-center">
           <Button variant="secondary" onClick={prevStep}>
             Назад
           </Button>
-          <Button onClick={nextStep} disabled={!canContinue} isLoading={isUploading}>
+          <Button 
+            onClick={handleContinue} 
+            disabled={!canContinue} 
+            isLoading={isUploading || isValidating}
+          >
             Аналізувати
           </Button>
         </div>
-        <button
+        
+        {/* Skip button */}
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
           onClick={handleSkip}
-          className="text-sm text-text-muted hover:text-text-secondary transition-colors"
+          className="flex items-center gap-2 text-text-muted hover:text-text-secondary transition-colors text-sm"
         >
-          Пропустити цей крок
-        </button>
+          <SkipForward className="w-4 h-4" />
+          <span>Пропустити цей крок</span>
+        </motion.button>
+        
+        <p className="text-xs text-text-muted text-center max-w-xs">
+          Аналіз долоні опціональний. Ви можете пропустити і отримати звіт без нього.
+        </p>
       </div>
     </motion.div>
   );

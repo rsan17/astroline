@@ -88,12 +88,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0a0f1a',
+  themeColor: '#010101',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
 };
+
+import { GhostCursorGlow } from '@/components/effects';
 
 export default function RootLayout({
   children,
@@ -122,8 +124,11 @@ export default function RootLayout({
         {/* PreLoader */}
         <PreLoader />
         
+        {/* Ghost cursor effect - desktop only */}
+        <GhostCursorGlow />
+        
         {/* Background effects */}
-        <div className="fixed inset-0 star-field opacity-30 pointer-events-none" />
+        <div className="fixed inset-0 star-field opacity-20 pointer-events-none" />
         <div className="fixed inset-0 cosmic-bg pointer-events-none" />
         <div className="aurora" />
         

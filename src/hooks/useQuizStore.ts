@@ -134,6 +134,18 @@ export const useQuizStore = create<QuizState>()(
     }),
     {
       name: 'astroline-quiz',
+      version: 2, // Increment this to clear old localStorage data on deploy
+      migrate: (persistedState, version) => {
+        // Clear old data when version changes (users will restart quiz)
+        if (version < 2) {
+          return {
+            currentStep: 1,
+            data: {},
+            reportId: undefined,
+          };
+        }
+        return persistedState as { currentStep: number; data: QuizData; reportId?: string };
+      },
       partialize: (state) => ({
         currentStep: state.currentStep,
         data: state.data,

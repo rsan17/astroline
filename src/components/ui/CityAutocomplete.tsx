@@ -181,7 +181,8 @@ export function CityAutocomplete({
     if (value !== query) {
       setQuery(value);
     }
-  }, [value]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]); // Intentionally not including query to avoid infinite loop
 
   return (
     <div ref={containerRef} className="relative w-full">

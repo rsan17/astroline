@@ -37,6 +37,17 @@ export default function ReportPage() {
         if (storedReport) {
           const parsedReport = JSON.parse(storedReport) as FullReport;
           console.log('✅ Loaded AI-generated report from localStorage');
+          
+          // Check if payment was successful (from Monobank redirect)
+          if (paymentSuccess && !parsedReport.isPaid) {
+            console.log('💳 Unlocking report after successful Monobank payment');
+            parsedReport.isPaid = true;
+            localStorage.setItem(`astroline-report-${reportId}`, JSON.stringify(parsedReport));
+            
+            // Clear payment reference from localStorage
+            localStorage.removeItem(`astroline-payment-${reportId}`);
+          }
+          
           setReport(parsedReport);
           setIsLoading(false);
           return;
@@ -59,7 +70,7 @@ export default function ReportPage() {
           risingSign: data.risingSign || 'Скорпіон',
         },
         data.palmReading,
-        false
+        paymentSuccess // Unlock if coming from successful payment
       );
       setReport(generatedReport);
       setIsLoading(false);
@@ -67,7 +78,7 @@ export default function ReportPage() {
 
     const timer = setTimeout(loadReport, 800);
     return () => clearTimeout(timer);
-  }, [reportId, data]);
+  }, [reportId, data, paymentSuccess]);
 
   // Auto-hide success toast after 5 seconds - MUST be before any conditional returns!
   useEffect(() => {

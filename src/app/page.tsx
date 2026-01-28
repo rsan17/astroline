@@ -2,14 +2,18 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { Sparkles } from 'lucide-react';
 import {
   Hero,
-  Features,
-  SocialProof,
+  HowItWorks,
+  WhatYouDiscover,
+  Pricing,
   Testimonials,
   FAQ,
   FooterCTA,
+  // GalaxySection, // hidden for now
 } from '@/components/landing';
+import { LanguageSwitcher } from '@/components/shared';
 import { JsonLd, RelatedLinks } from '@/components/seo';
 import {
   createOrganizationJsonLd,
@@ -17,32 +21,35 @@ import {
   createFAQJsonLd,
 } from '@/lib/seo';
 import { ZODIAC_SIGNS } from '@/lib/constants/zodiac';
+import { useTranslations } from '@/lib/i18n';
 
-// FAQ data for JSON-LD (matching FAQ component)
+// FAQ data for JSON-LD
 const faqData = [
   {
-    question: 'Наскільки точні астрологічні прогнози?',
-    answer: 'Наші прогнози базуються на класичній астрології та сучасних алгоритмах. 95% користувачів підтверджують високу точність персоналізованих звітів.',
+    question: 'How accurate are the astrological predictions?',
+    answer: 'Our predictions are based on classical astrology and modern algorithms. 95% of users confirm high accuracy of personalized reports.',
   },
   {
-    question: 'Як працює аналіз долоні?',
-    answer: 'Ми використовуємо технологію комп\'ютерного зору та AI для аналізу ліній долоні.',
+    question: 'How does palm analysis work?',
+    answer: 'We use computer vision and AI technology to analyze palm lines.',
   },
   {
-    question: 'Чи безпечні мої персональні дані?',
-    answer: 'Абсолютно! Ми використовуємо шифрування банківського рівня для захисту ваших даних.',
+    question: 'Is my personal data safe?',
+    answer: 'Absolutely! We use bank-level encryption to protect your data.',
   },
   {
-    question: 'Скільки часу займає проходження квізу?',
-    answer: 'Весь квіз займає приблизно 3-5 хвилин.',
+    question: 'How long does the quiz take?',
+    answer: 'The entire quiz takes approximately 3-5 minutes.',
   },
   {
-    question: 'Чи можу я скасувати підписку?',
-    answer: 'Так, ви можете скасувати підписку в будь-який момент.',
+    question: 'Can I cancel my subscription?',
+    answer: 'Yes, you can cancel your subscription at any time.',
   },
 ];
 
 export default function LandingPage() {
+  const { t } = useTranslations();
+
   return (
     <div className="min-h-screen">
       {/* JSON-LD Structured Data */}
@@ -54,119 +61,147 @@ export default function LandingPage() {
         ]}
       />
 
-      {/* Navigation - safe area support + responsive */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm md:backdrop-blur-md border-b border-white/5 pt-[env(safe-area-inset-top)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-3 flex items-center justify-between">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-lg border-b border-white/5 pt-[env(safe-area-inset-top)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <motion.a
             href="/"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-lg md:text-xl font-bold gradient-text"
+            className="flex items-center gap-2 text-lg md:text-xl font-bold"
           >
-            ✨ Astroline
+            <Sparkles className="w-5 h-5 text-gold" />
+            <span className="gradient-text">Astroline</span>
           </motion.a>
-          <motion.a
-            href="/quiz"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="btn-secondary text-sm py-2 px-4"
-          >
-            Почати тест
-          </motion.a>
+
+          <div className="flex items-center gap-3 sm:gap-4">
+            <LanguageSwitcher variant="toggle" />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <Link
+                href="/quiz"
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                         bg-white/10 border border-white/20 text-white
+                         hover:bg-white/15 hover:border-white/30
+                         transition-all duration-300"
+              >
+                {t.nav.quiz}
+              </Link>
+            </motion.div>
+          </div>
         </div>
       </nav>
 
       {/* Main content */}
       <main>
         <Hero />
-        <SocialProof />
-        <Features />
+        <HowItWorks />
+        <WhatYouDiscover />
+        
+        {/* Pricing - temporarily hidden */}
+        {/* <Pricing /> */}
         
         {/* Zodiac Signs Section for SEO */}
         <RelatedLinks type="zodiac" className="border-t border-white/10" />
         
         <Testimonials />
+        
+        {/* Interactive Galaxy Section - hidden for now */}
+        {/* <GalaxySection /> */}
+        
         <FAQ />
         <FooterCTA />
       </main>
 
-      {/* Footer with sitemap links - responsive grid */}
-      <footer className="border-t border-white/10 py-8 sm:py-10 md:py-12 px-3 sm:px-6 lg:px-8">
+      {/* Footer */}
+      <footer className="border-t border-white/10 py-12 px-4 sm:px-6 lg:px-8 bg-background-secondary/30">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
-            {/* Brand - full width on mobile, 2 cols on sm, 1 col on lg */}
-            <div className="sm:col-span-2 lg:col-span-1 text-center sm:text-left">
-              <h3 className="text-lg sm:text-xl font-bold gradient-text mb-3 sm:mb-4">✨ Astroline</h3>
-              <p className="text-text-secondary text-xs sm:text-sm max-w-md mx-auto sm:mx-0">
-                Ваш персональний астрологічний гід. Відкрийте таємниці вашої долі 
-                з персоналізованими звітами та прогнозами.
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+            {/* Brand */}
+            <div className="sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-gold" />
+                <span className="text-xl font-bold gradient-text">{t.footer.brand}</span>
+              </div>
+              <p className="text-text-secondary text-sm mb-4">
+                {t.footer.tagline}
               </p>
+              <LanguageSwitcher variant="dropdown" />
             </div>
 
-            {/* Zodiac Links - merged into single column with 2-col internal grid */}
-            <div className="sm:col-span-2 lg:col-span-2 text-center sm:text-left">
-              <h4 className="font-semibold text-text-primary mb-3 sm:mb-4">Знаки зодіаку</h4>
-              <ul className="grid grid-cols-2 gap-x-3 sm:gap-x-6 lg:gap-x-8 gap-y-1.5 sm:gap-y-2 text-xs sm:text-sm">
+            {/* Zodiac Links */}
+            <div className="sm:col-span-2 lg:col-span-2">
+              <h4 className="font-semibold text-text-primary mb-4">{t.footer.zodiacSigns}</h4>
+              <ul className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-sm">
                 {ZODIAC_SIGNS.map((sign) => (
                   <li key={sign.slug}>
                     <Link
                       href={`/zodiac/${sign.slug}`}
-                      className="text-text-secondary hover:text-accent transition-colors"
+                      className="text-text-secondary hover:text-accent transition-colors inline-flex items-center gap-1"
                     >
-                      {sign.symbol} {sign.nameUk}
+                      <span>{sign.symbol}</span>
+                      <span>{sign.nameUk}</span>
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Product Links */}
-            <div className="text-center sm:text-left">
-              <h4 className="font-semibold text-text-primary mb-3 sm:mb-4">Продукт</h4>
-              <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+            {/* Links */}
+            <div>
+              <h4 className="font-semibold text-text-primary mb-4">{t.footer.product.title}</h4>
+              <ul className="space-y-2 text-sm">
                 <li>
                   <Link href="/quiz" className="text-text-secondary hover:text-accent transition-colors">
-                    Пройти квіз
+                    {t.footer.product.quiz}
                   </Link>
                 </li>
                 <li>
-                  <a href="#features" className="text-text-secondary hover:text-accent transition-colors">
-                    Можливості
+                  <a href="#how-it-works" className="text-text-secondary hover:text-accent transition-colors">
+                    {t.footer.product.features}
                   </a>
                 </li>
                 <li>
-                  <a href="#testimonials" className="text-text-secondary hover:text-accent transition-colors">
-                    Відгуки
+                  <a href="#pricing" className="text-text-secondary hover:text-accent transition-colors">
+                    {t.pricing.label}
                   </a>
                 </li>
                 <li>
                   <a href="#faq" className="text-text-secondary hover:text-accent transition-colors">
-                    FAQ
+                    {t.faq.label}
                   </a>
                 </li>
                 <li>
                   <Link href="/privacy" className="text-text-secondary hover:text-accent transition-colors">
-                    Конфіденційність
+                    {t.footer.legal.privacy}
                   </Link>
                 </li>
                 <li>
                   <Link href="/terms" className="text-text-secondary hover:text-accent transition-colors">
-                    Умови використання
+                    {t.footer.legal.terms}
                   </Link>
                 </li>
               </ul>
             </div>
           </div>
 
-          {/* Bottom bar - centered on mobile */}
-          <div className="pt-6 sm:pt-8 border-t border-white/10 flex flex-col items-center gap-3 sm:gap-4 sm:flex-row sm:justify-between">
-            <p className="text-text-muted text-xs sm:text-sm text-center sm:text-left">
-              © 2026 Astroline. Усі права захищені.
+          {/* Bottom bar */}
+          <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-text-muted text-sm">
+              {t.footer.copyright}
             </p>
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-4 text-text-muted text-xs sm:text-sm">
-              <span>🔒 Безпечна оплата</span>
-              <span>💳 Stripe</span>
-              <span>🇺🇦 Україна</span>
+            <div className="flex flex-wrap justify-center gap-4 text-text-muted text-sm">
+              <span className="flex items-center gap-1">
+                🔒 {t.footer.badges.secure}
+              </span>
+              <span className="flex items-center gap-1">
+                💳 {t.footer.badges.stripe}
+              </span>
+              <span className="flex items-center gap-1">
+                🇺🇦 {t.footer.badges.ukraine}
+              </span>
             </div>
           </div>
         </div>
