@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Sparkles, Sun, Moon, ArrowUp } from 'lucide-react';
 import { getElementEmoji } from '@/lib/report-data';
 import type { NatalChart } from '@/types/report';
+import { isUnknownSign } from '@/types/report';
 
 interface ReportHeroProps {
   natalChart: NatalChart;
@@ -188,10 +189,14 @@ export function ReportHero({ natalChart, userName }: ReportHeroProps) {
           >
             <div className="flex items-center justify-center gap-2 mb-2">
               <Moon className="w-5 h-5 text-blue-300" />
-              <span className="text-3xl md:text-4xl">{moonSign.symbol}</span>
+              <span className="text-3xl md:text-4xl">
+                {isUnknownSign(moonSign) ? '?' : moonSign.symbol}
+              </span>
             </div>
             <div className="text-xs text-text-muted uppercase tracking-wider">Місяць</div>
-            <div className="text-sm font-medium text-text-primary mt-1">{moonSign.name}</div>
+            <div className="text-sm font-medium text-text-primary mt-1">
+              {isUnknownSign(moonSign) ? 'Невідомо' : moonSign.name}
+            </div>
           </motion.div>
 
           {/* Rising Sign */}
@@ -201,10 +206,14 @@ export function ReportHero({ natalChart, userName }: ReportHeroProps) {
           >
             <div className="flex items-center justify-center gap-2 mb-2">
               <ArrowUp className="w-5 h-5 text-accent" />
-              <span className="text-3xl md:text-4xl">{risingSign.symbol}</span>
+              <span className="text-3xl md:text-4xl">
+                {isUnknownSign(risingSign) ? '?' : risingSign.symbol}
+              </span>
             </div>
             <div className="text-xs text-text-muted uppercase tracking-wider">Асцендент</div>
-            <div className="text-sm font-medium text-text-primary mt-1">{risingSign.name}</div>
+            <div className="text-sm font-medium text-text-primary mt-1">
+              {isUnknownSign(risingSign) ? 'Невідомо' : risingSign.name}
+            </div>
           </motion.div>
         </motion.div>
 
