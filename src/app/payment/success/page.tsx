@@ -1,10 +1,11 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ConfettiEffect, EmojiConfetti } from '@/components/ui/ConfettiEffect';
 import { Check, Sparkles, Star, Heart, Briefcase, Hand } from 'lucide-react';
+import { trackPurchase } from '@/lib/analytics';
 
 const includedFeatures = [
   { icon: Star, text: 'Повна натальна карта' },
@@ -48,8 +49,9 @@ function PaymentSuccessContent() {
   
   const [showConfetti, setShowConfetti] = useState(true);
   const [isUnlocking, setIsUnlocking] = useState(true);
+  const hasTrackedPurchase = useRef(false);
 
-  // Unlock report in localStorage
+  // Unlock report in localStorage and track purchase
   useEffect(() => {
     if (reportId) {
       try {
@@ -69,10 +71,22 @@ function PaymentSuccessContent() {
       }
     }
     
+    // Track purchase event for Meta Pixel (only once)
+    if (!hasTrackedPurchase.current) {
+      hasTrackedPurchase.current = true;
+      trackPurchase({
+        value: 149, // Price in UAH
+        currency: 'UAH',
+        orderId: reference || undefined,
+        content_name: 'Astrology Report',
+      });
+      console.log('📊 Meta Pixel: Purchase event tracked');
+    }
+    
     // Short delay before showing content
     const timer = setTimeout(() => setIsUnlocking(false), 500);
     return () => clearTimeout(timer);
-  }, [reportId]);
+  }, [reportId, reference]);
 
   const handleViewReport = () => {
     if (reportId) {

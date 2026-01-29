@@ -96,6 +96,7 @@ export const viewport: Viewport = {
 };
 
 import { GhostCursorGlow } from '@/components/effects';
+import { MetaPixel } from '@/components/analytics';
 
 export default function RootLayout({
   children,
@@ -104,6 +105,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="uk" className={`${philosopher.variable} ${nunito.variable}`}>
+      <head>
+        <MetaPixel />
+      </head>
       <body className={`${nunito.className} antialiased`}>
         {/* SVG Filter for PreLoader */}
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style={{ position: 'absolute', width: 0, height: 0 }}>
