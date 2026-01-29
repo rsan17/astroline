@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useSearchParams } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import { useQuizStore } from '@/hooks/useQuizStore';
 import { generateReport } from '@/lib/report-data';
 import type { FullReport } from '@/types/report';
 import {
   ReportHero,
   NatalChartSection,
+  NumerologySection,
   PersonalitySection,
   ForecastSection,
   LoveSection,
@@ -26,11 +28,50 @@ export default function ReportPage() {
   const { data } = useQuizStore();
   const [report, setReport] = useState<FullReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(paymentSuccess);
 
   // Load report effect
   useEffect(() => {
-    const loadReport = () => {
+    const loadReport = async () => {
+      // 1. First, try to fetch from database API
+      try {
+        console.log('🔍 Fetching report from database...');
+        const response = await fetch(`/api/report/${reportId}`);
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.report) {
+            console.log('✅ Loaded report from database');
+            let dbReport = result.report as FullReport;
+            
+            // Check if payment was successful (from Monobank redirect)
+            if (paymentSuccess && !dbReport.isPaid) {
+              console.log('💳 Unlocking report after successful Monobank payment');
+              dbReport.isPaid = true;
+              
+              // Update in database
+              await fetch(`/api/report/${reportId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isPaid: true }),
+              });
+              
+              // Also update localStorage for consistency
+              localStorage.setItem(`astroline-report-${reportId}`, JSON.stringify(dbReport));
+              localStorage.removeItem(`astroline-payment-${reportId}`);
+            }
+            
+            setReport(dbReport);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to fetch report from database:', error);
+      }
+
+      // 2. Fallback to localStorage
       try {
         const storedReport = localStorage.getItem(`astroline-report-${reportId}`);
         
@@ -56,6 +97,7 @@ export default function ReportPage() {
         console.warn('⚠️ Failed to load report from localStorage:', error);
       }
 
+      // 3. Last resort: generate static fallback report
       console.log('📄 Generating static fallback report (direct URL access)');
       const generatedReport = generateReport(
         reportId,
@@ -76,7 +118,7 @@ export default function ReportPage() {
       setIsLoading(false);
     };
 
-    const timer = setTimeout(loadReport, 800);
+    const timer = setTimeout(loadReport, 300);
     return () => clearTimeout(timer);
   }, [reportId, data, paymentSuccess]);
 
@@ -87,6 +129,59 @@ export default function ReportPage() {
       return () => clearTimeout(timer);
     }
   }, [showSuccessToast]);
+
+  // Handle payment purchase
+  const handlePurchase = async () => {
+    if (isPaymentLoading) return;
+    
+    setIsPaymentLoading(true);
+    
+    try {
+      // Create payment via Monobank with default plan (trial_4w = 4 weeks / 419 UAH)
+      const moonSignName = report?.natalChart?.moonSign && 'name' in report.natalChart.moonSign 
+        ? report.natalChart.moonSign.name 
+        : data.moonSign;
+      const risingSignName = report?.natalChart?.risingSign && 'name' in report.natalChart.risingSign 
+        ? report.natalChart.risingSign.name 
+        : data.risingSign;
+      
+      const response = await fetch('/api/monobank/create-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: 'trial_4w', // Default plan - 4 weeks access
+          reportId: reportId,
+          email: report?.userData?.email || data.email,
+          sunSign: report?.natalChart?.sunSign?.name || data.sunSign,
+          moonSign: moonSignName,
+          risingSign: risingSignName,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to create payment');
+      }
+
+      // Store reference for later verification
+      if (result.reference) {
+        localStorage.setItem(`astroline-payment-${reportId}`, JSON.stringify({
+          reference: result.reference,
+          invoiceId: result.invoiceId,
+          planId: 'trial_4w',
+        }));
+      }
+
+      // Redirect to Monobank payment page
+      window.location.href = result.pageUrl;
+
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert(error instanceof Error ? error.message : 'Помилка оплати. Спробуйте ще раз.');
+      setIsPaymentLoading(false);
+    }
+  };
 
   // Conditional returns AFTER all hooks
   if (isLoading) {
@@ -134,8 +229,19 @@ export default function ReportPage() {
               {report.natalChart.sunSign.symbol} {report.natalChart.sunSign.name}
             </span>
             {!report.isPaid && (
-              <button className="btn-primary text-sm py-2 px-4">
-                🔓 Розблокувати
+              <button 
+                onClick={handlePurchase}
+                disabled={isPaymentLoading}
+                className="btn-primary text-sm py-2 px-4 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isPaymentLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Завантаження...
+                  </>
+                ) : (
+                  '🔓 Розблокувати'
+                )}
               </button>
             )}
           </div>
@@ -148,29 +254,39 @@ export default function ReportPage() {
         
         <NatalChartSection natalChart={report.natalChart} />
         
+        {/* Numerology Section - always visible */}
+        {report.numerology && (
+          <NumerologySection numerology={report.numerology} />
+        )}
+        
         <PersonalitySection 
           traits={report.personality} 
-          isPaid={report.isPaid} 
+          isPaid={report.isPaid}
+          onUnlockClick={handlePurchase}
         />
         
         <ForecastSection 
           forecasts={report.forecast2026} 
-          isPaid={report.isPaid} 
+          isPaid={report.isPaid}
+          onUnlockClick={handlePurchase}
         />
         
         <LoveSection 
           love={report.love} 
-          isPaid={report.isPaid} 
+          isPaid={report.isPaid}
+          onUnlockClick={handlePurchase}
         />
         
         <CareerSection 
           career={report.career} 
-          isPaid={report.isPaid} 
+          isPaid={report.isPaid}
+          onUnlockClick={handlePurchase}
         />
         
         <PalmSection 
           palmReading={report.palmReading} 
-          isPaid={report.isPaid} 
+          isPaid={report.isPaid}
+          onUnlockClick={handlePurchase}
         />
         
         <LuckySection lucky={report.lucky} />
@@ -179,6 +295,10 @@ export default function ReportPage() {
           reportId={reportId}
           email={report.userData.email}
           sunSign={report.natalChart.sunSign.name}
+          moonSign={'name' in report.natalChart.moonSign ? report.natalChart.moonSign.name : undefined}
+          risingSign={'name' in report.natalChart.risingSign ? report.natalChart.risingSign.name : undefined}
+          isPaid={report.isPaid}
+          onUnlockClick={handlePurchase}
         />
       </main>
 
@@ -194,8 +314,19 @@ export default function ReportPage() {
               <p className="text-text-primary font-medium">Розблокуйте повний звіт</p>
               <p className="text-sm text-text-secondary">Отримайте всі інсайти та прогнози</p>
             </div>
-            <button className="btn-primary flex-shrink-0 w-full sm:w-auto">
-              🔮 Отримати повний доступ
+            <button 
+              onClick={handlePurchase}
+              disabled={isPaymentLoading}
+              className="btn-primary flex-shrink-0 w-full sm:w-auto disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isPaymentLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Завантаження...
+                </>
+              ) : (
+                '🔮 Отримати повний доступ'
+              )}
             </button>
           </div>
         </motion.div>

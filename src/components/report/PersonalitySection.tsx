@@ -7,6 +7,7 @@ import type { PersonalityTrait } from '@/types/report';
 interface PersonalitySectionProps {
   traits: PersonalityTrait[];
   isPaid: boolean;
+  onUnlockClick?: () => void;
 }
 
 const containerVariants = {
@@ -26,7 +27,7 @@ const itemVariants = {
   },
 };
 
-export function PersonalitySection({ traits, isPaid }: PersonalitySectionProps) {
+export function PersonalitySection({ traits, isPaid, onUnlockClick }: PersonalitySectionProps) {
   return (
     <section className="py-20 px-4 relative overflow-hidden">
       {/* Background effects */}
@@ -92,9 +93,11 @@ export function PersonalitySection({ traits, isPaid }: PersonalitySectionProps) 
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-2xl"
+                    className="absolute inset-0 bg-background/80 backdrop-blur-md z-10 flex flex-col items-center justify-center rounded-2xl"
                   >
-                    <Lock className="w-8 h-8 text-text-muted mb-3" />
+                    <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+                      <Lock className="w-5 h-5 text-text-muted" />
+                    </div>
                     <span className="text-sm text-text-secondary">Доступно в повній версії</span>
                   </motion.div>
                 )}
@@ -155,6 +158,7 @@ export function PersonalitySection({ traits, isPaid }: PersonalitySectionProps) 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={onUnlockClick}
                 className="btn-primary"
               >
                 Отримати повний звіт

@@ -334,6 +334,8 @@ export const en = {
       title: 'Your report is ready!',
       subtitle: 'Choose a plan to get full access',
       generating: 'Generating your report...',
+      specialOffer: 'Special offer expires in',
+      unlock: 'Unlock',
       phrases: [
         'Reading the stars...',
         'Decoding natal chart...',
@@ -342,6 +344,13 @@ export const en = {
         'Composing your forecast...',
         'Generating report...',
       ],
+      phrasesIcons: ['✨', '🌙', '🪐', '🔮', '📜', '⭐'],
+      teaserSections: {
+        natalChart: 'Natal Chart',
+        forecast: '2026 Forecast',
+        loveCompatibility: 'Love Compatibility',
+        careerGuidance: 'Career Guidance',
+      },
       preparedFor: 'Prepared for',
       yourSign: 'Your sign',
       getAccess: 'Get Access',

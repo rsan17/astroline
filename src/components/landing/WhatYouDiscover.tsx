@@ -39,7 +39,7 @@ export function WhatYouDiscover() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-accent text-sm font-medium uppercase tracking-wider mb-4 block">
+          <span className="text-text-secondary text-sm font-medium uppercase tracking-wider mb-4 block">
             {t.discover.label}
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
@@ -81,7 +81,7 @@ export function WhatYouDiscover() {
                 <div className="mt-auto relative">
                   <div className="glass rounded-xl p-4 relative overflow-hidden">
                     {/* Blur overlay */}
-                    <div className="absolute inset-0 backdrop-blur-sm bg-background/50 flex items-center justify-center z-10">
+                    <div className="absolute inset-0 backdrop-blur-xl bg-background/90 flex items-center justify-center z-10">
                       <span className="flex items-center gap-2 text-xs text-accent">
                         <Lock className="w-3 h-3" />
                         Unlock to reveal

@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Star } from 'lucide-react';
 import type { LuckyAttributes } from '@/types/report';
 
 interface LuckySectionProps {
@@ -14,24 +15,28 @@ export function LuckySection({ lucky }: LuckySectionProps) {
       icon: '🔢',
       items: lucky.numbers.map(n => n.toString()),
       color: 'from-yellow-400 to-amber-500',
+      explanation: lucky.numbersExplanation,
     },
     {
       title: 'Щасливі дні',
       icon: '📅',
       items: lucky.days,
       color: 'from-green-400 to-emerald-500',
+      explanation: lucky.daysExplanation,
     },
     {
       title: 'Щасливі кольори',
       icon: '🎨',
       items: lucky.colors,
       color: 'from-pink-400 to-rose-500',
+      explanation: lucky.colorsExplanation,
     },
     {
       title: 'Щасливі камені',
       icon: '💎',
       items: lucky.gems,
       color: 'from-blue-400 to-indigo-500',
+      explanation: lucky.gemsExplanation,
     },
   ];
 
@@ -44,8 +49,18 @@ export function LuckySection({ lucky }: LuckySectionProps) {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
+          <motion.div
+            initial={{ scale: 0 }}
+            whileInView={{ scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ type: 'spring', bounce: 0.5 }}
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-amber-500/20 mb-6"
+          >
+            <Star className="w-8 h-8 text-yellow-400" />
+          </motion.div>
+          
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            🍀 <span className="gradient-text">Щасливі атрибути</span>
+            <span className="gradient-text">Щасливі атрибути</span>
           </h2>
           <p className="text-text-secondary max-w-2xl mx-auto">
             Персоналізовані талісмани для вашого знаку
@@ -69,7 +84,7 @@ export function LuckySection({ lucky }: LuckySectionProps) {
                 {section.icon}
               </motion.div>
               <h3 className="font-semibold text-text-primary mb-3">{section.title}</h3>
-              <div className="space-y-2">
+              <div className="space-y-2 mb-3">
                 {section.items.map((item, i) => (
                   <motion.div
                     key={item}
@@ -84,6 +99,18 @@ export function LuckySection({ lucky }: LuckySectionProps) {
                   </motion.div>
                 ))}
               </div>
+              {/* AI-personalized explanation */}
+              {section.explanation && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.4 }}
+                  className="text-xs text-text-muted mt-3 pt-3 border-t border-white/10 italic"
+                >
+                  {section.explanation}
+                </motion.p>
+              )}
             </motion.div>
           ))}
         </div>
@@ -166,7 +193,9 @@ export function LuckySection({ lucky }: LuckySectionProps) {
 
             <div className="text-center max-w-xs">
               <p className="text-sm text-text-secondary">
-                Розташуйте робочий стіл чи ліжко у напрямку <span className="text-accent font-medium">{lucky.direction}</span> для залучення позитивної енергії
+                {lucky.directionExplanation || (
+                  <>Розташуйте робочий стіл чи ліжко у напрямку <span className="text-accent font-medium">{lucky.direction}</span> для залучення позитивної енергії</>
+                )}
               </p>
             </div>
           </div>

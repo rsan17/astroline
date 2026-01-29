@@ -1,6 +1,7 @@
 // Mock data generator for Astroline reports
 import type {
   ZodiacSign,
+  UnknownSign,
   NatalChart,
   PersonalityTrait,
   QuarterlyForecast,
@@ -10,6 +11,7 @@ import type {
   LuckyAttributes,
   FullReport,
 } from '@/types/report';
+import { calculateNumerology } from './numerology';
 
 // Zodiac signs data
 export const zodiacSigns: Record<string, ZodiacSign> = {
@@ -360,8 +362,8 @@ export function generateReport(
     birthTime?: string;
     birthPlace?: string;
     sunSign: string;
-    moonSign: string;
-    risingSign: string;
+    moonSign?: string | null;
+    risingSign?: string | null;
   },
   palmData?: {
     childrenCount: string;
@@ -369,11 +371,25 @@ export function generateReport(
     bigChanges: boolean;
     wealthIndicator: string;
   },
-  isPaid: boolean = false
+  isPaid: boolean = false,
+  lang: 'uk' | 'en' = 'uk'
 ): FullReport {
   const sunSign = zodiacSigns[userData.sunSign] || zodiacSigns['Лев'];
-  const moonSign = zodiacSigns[userData.moonSign] || zodiacSigns['Риби'];
-  const risingSign = zodiacSigns[userData.risingSign] || zodiacSigns['Скорпіон'];
+  
+  // Handle Moon sign - unknown if no birth time provided
+  const hasBirthTime = !!userData.birthTime;
+  const moonSignData: ZodiacSign | UnknownSign = hasBirthTime && userData.moonSign
+    ? (zodiacSigns[userData.moonSign] || zodiacSigns['Риби'])
+    : { isUnknown: true, reason: 'no_birth_time' };
+  
+  // Handle Rising sign - unknown if no birth place provided
+  const hasBirthPlace = !!userData.birthPlace;
+  const risingSignData: ZodiacSign | UnknownSign = hasBirthPlace && userData.risingSign
+    ? (zodiacSigns[userData.risingSign] || zodiacSigns['Скорпіон'])
+    : { isUnknown: true, reason: 'no_birth_place' };
+
+  // Calculate numerology
+  const numerology = calculateNumerology(userData.birthDate, lang);
 
   // Get compatibility data
   const compat = compatibilityData[userData.sunSign] || compatibilityData['Лев'];
@@ -387,6 +403,21 @@ export function generateReport(
   // Get career data
   const career = careerData[userData.sunSign] || careerData['Лев'];
 
+  // Moon description based on availability
+  const moonDescription = hasBirthTime && userData.moonSign
+    ? (moonDescriptions[userData.moonSign] || moonDescriptions['Риби'])
+    : null;
+
+  // Rising description based on availability
+  const risingDescription = hasBirthPlace && userData.risingSign
+    ? (risingDescriptions[userData.risingSign] || risingDescriptions['Скорпіон'])
+    : null;
+
+  // Love overview adapts if moon sign is unknown
+  const loveOverview = hasBirthTime && userData.moonSign
+    ? `Ваша комбінація ${userData.sunSign} Сонця та ${userData.moonSign} Місяця створює унікальну енергію в коханні. Ви шукаєте партнера, який розуміє вашу глибину.`
+    : `Як ${userData.sunSign}, ви маєте унікальний підхід до кохання. Ваша пристрасність та глибина почуттів роблять вас чудовим партнером.`;
+
   return {
     id,
     createdAt: new Date().toISOString(),
@@ -399,16 +430,17 @@ export function generateReport(
     },
     natalChart: {
       sunSign,
-      moonSign,
-      risingSign,
+      moonSign: moonSignData,
+      risingSign: risingSignData,
       sunDescription: sunDescriptions[userData.sunSign] || sunDescriptions['Лев'],
-      moonDescription: moonDescriptions[userData.moonSign] || moonDescriptions['Риби'],
-      risingDescription: risingDescriptions[userData.risingSign] || risingDescriptions['Скорпіон'],
+      moonDescription,
+      risingDescription,
     },
+    numerology,
     personality: personalityTraitsByElement[sunSign.element],
     forecast2026: forecastTemplates,
     love: {
-      overview: `Ваша комбінація ${userData.sunSign} Сонця та ${userData.moonSign} Місяця створює унікальну енергію в коханні. Ви шукаєте партнера, який розуміє вашу глибину.`,
+      overview: loveOverview,
       strengths: ['Відданість', 'Пристрасть', 'Глибина почуттів'],
       challenges: ['Ревнощі', 'Надмірна емоційність'],
       advice: 'У 2026 році відкрийтесь новим знайомствам і не бійтесь вразливості.',

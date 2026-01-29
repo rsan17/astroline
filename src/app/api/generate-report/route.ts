@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAstroReportWithAI, isAIAvailable } from '@/lib/ai';
 import type { AIProvider } from '@/lib/ai';
+import { saveReport } from '@/lib/report-store';
 import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
@@ -21,6 +22,8 @@ export async function POST(request: NextRequest) {
       relationshipStatus,
       favoriteColor,
       element,
+      // Language for report generation
+      locale,
     } = body;
 
     // Validate required fields
@@ -34,19 +37,26 @@ export async function POST(request: NextRequest) {
     // Generate unique report ID
     const reportId = crypto.randomBytes(8).toString('hex');
 
+    // Determine language (default to Ukrainian)
+    const lang: 'uk' | 'en' = locale === 'en' ? 'en' : 'uk';
+
     // Log AI availability and request info
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('🔮 Generating Astrology Report');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log(`📧 Email: ${email}`);
     console.log(`☀️ Sun Sign: ${sunSign}`);
+    console.log(`🌙 Moon Sign: ${moonSign || 'not provided (no birth time)'}`);
+    console.log(`⬆️ Rising Sign: ${risingSign || 'not provided (no birth place)'}`);
     console.log(`🎯 Goals: ${goals?.join(', ') || 'not specified'}`);
     console.log(`💕 Relationship: ${relationshipStatus || 'not specified'}`);
     console.log(`🎨 Color: ${favoriteColor || 'not specified'}`);
     console.log(`🌊 Element: ${element || 'not specified'}`);
+    console.log(`🌐 Language: ${lang}`);
     console.log(`🤖 AI Available: ${isAIAvailable()}`);
 
     // Generate the report with AI enhancement (falls back to static if AI unavailable)
+    // Note: moonSign and risingSign are only valid if birthTime/birthPlace provided
     const { report, provider } = await generateAstroReportWithAI(
       reportId,
       {
@@ -56,15 +66,16 @@ export async function POST(request: NextRequest) {
         birthTime,
         birthPlace,
         sunSign,
-        moonSign: moonSign || sunSign,
-        risingSign: risingSign || sunSign,
+        moonSign: birthTime ? moonSign : undefined, // Only use if birth time provided
+        risingSign: birthPlace ? risingSign : undefined, // Only use if birth place provided
         goals: goals || [],
         relationshipStatus,
         favoriteColor,
         element,
       },
       palmReading,
-      false // isPaid
+      false, // isPaid
+      lang
     );
 
     // Log which AI provider was used
@@ -74,12 +85,16 @@ export async function POST(request: NextRequest) {
       static: '📄 Static Fallback',
     };
     console.log(`✅ Report generated using: ${providerLabels[provider]}`);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-    // In a real app, you would:
-    // 1. Save the report to database (Supabase)
-    // 2. Associate it with user account
-    // 3. Handle payment status
+    // Save report to database (Supabase)
+    const dbResult = await saveReport(reportId, email, report);
+    if (dbResult.success) {
+      console.log(`💾 Report saved to database: ${reportId}`);
+    } else {
+      console.warn(`⚠️ Could not save report to database: ${dbResult.error}`);
+    }
+
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     return NextResponse.json({ 
       success: true, 

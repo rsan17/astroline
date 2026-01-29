@@ -92,7 +92,7 @@ export function Features() {
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-block text-accent text-sm font-medium uppercase tracking-wider mb-4 px-4 py-2 rounded-full bg-accent/10"
+            className="inline-block text-text-secondary text-sm font-medium uppercase tracking-wider mb-4 px-4 py-2 rounded-full bg-white/10"
           >
             Що включено
           </motion.span>

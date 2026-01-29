@@ -1,6 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
+import type { FullReport } from '@/types/report';
 
 // Database types
+export interface Report {
+  id: string;
+  email: string | null;
+  report_data: FullReport;
+  is_paid: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ReportInsert = Omit<Report, 'created_at' | 'updated_at'> & {
+  created_at?: string;
+  updated_at?: string;
+};
+
 export interface Payment {
   id: string;
   reference: string;

@@ -7,6 +7,7 @@ import type { CareerSection as CareerSectionType } from '@/types/report';
 interface CareerSectionProps {
   career: CareerSectionType;
   isPaid: boolean;
+  onUnlockClick?: () => void;
 }
 
 const containerVariants = {
@@ -26,7 +27,7 @@ const itemVariants = {
   },
 };
 
-export function CareerSection({ career, isPaid }: CareerSectionProps) {
+export function CareerSection({ career, isPaid, onUnlockClick }: CareerSectionProps) {
   return (
     <section className="py-20 px-4 relative overflow-hidden">
       {/* Background effects */}
@@ -126,9 +127,11 @@ export function CareerSection({ career, isPaid }: CareerSectionProps) {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center"
+                className="absolute inset-0 bg-background/80 backdrop-blur-md z-10 flex flex-col items-center justify-center"
               >
-                <Lock className="w-8 h-8 text-text-muted mb-3" />
+                <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+                  <Lock className="w-5 h-5 text-text-muted" />
+                </div>
                 <span className="text-sm text-text-secondary">Доступно в повній версії</span>
               </motion.div>
             )}
@@ -168,16 +171,20 @@ export function CareerSection({ career, isPaid }: CareerSectionProps) {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center"
+              className="absolute inset-0 bg-background/80 backdrop-blur-md z-10 flex flex-col items-center justify-center"
             >
-              <Lock className="w-10 h-10 text-text-muted mb-4" />
-              <span className="text-text-secondary mb-6">Розблокуйте фінансові поради</span>
+              <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+                <Lock className="w-7 h-7 text-text-muted" />
+              </div>
+              <p className="text-text-primary font-medium mb-1">Фінансові поради</p>
+              <p className="text-text-muted text-sm mb-4">Доступні у повній версії звіту</p>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
-                className="btn-primary"
+                onClick={onUnlockClick}
+                className="btn-primary text-sm px-6"
               >
-                Отримати доступ
+                Розблокувати
               </motion.button>
             </motion.div>
           )}
@@ -221,7 +228,7 @@ export function CareerSection({ career, isPaid }: CareerSectionProps) {
               <Target className="w-6 h-6 text-accent" />
             </div>
             <div>
-              <h4 className="font-bold text-text-primary text-lg mb-2">🎯 Фокус 2026 року</h4>
+              <h4 className="font-bold text-text-primary text-lg mb-2">Фокус 2026 року</h4>
               <p className="text-text-secondary leading-relaxed">{career.yearFocus}</p>
             </div>
           </div>

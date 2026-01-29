@@ -7,9 +7,13 @@ import type { QuarterlyForecast } from '@/types/report';
 interface ForecastSectionProps {
   forecasts: QuarterlyForecast[];
   isPaid: boolean;
+  onUnlockClick?: () => void;
 }
 
-export function ForecastSection({ forecasts, isPaid }: ForecastSectionProps) {
+const quarterIcons = ['🌱', '🌸', '☀️', '🍂'];
+const quarterNames = ['Січень — Березень', 'Квітень — Червень', 'Липень — Вересень', 'Жовтень — Грудень'];
+
+export function ForecastSection({ forecasts, isPaid, onUnlockClick }: ForecastSectionProps) {
   const [activeQuarter, setActiveQuarter] = useState(0);
 
   return (
@@ -19,76 +23,71 @@ export function ForecastSection({ forecasts, isPaid }: ForecastSectionProps) {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-10"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            🔮 <span className="gradient-text">Прогноз на 2026 рік</span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">
+            <span className="gradient-text">Прогноз на 2026 рік</span>
           </h2>
           <p className="text-text-secondary max-w-2xl mx-auto">
             Що приготували для вас зірки у кожному кварталі
           </p>
         </motion.div>
 
-        {/* Timeline navigation */}
+        {/* Quarter Timeline */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="flex justify-center mb-8"
+          className="relative mb-10"
         >
-          <div className="inline-flex glass rounded-full p-1">
-            {forecasts.map((forecast, index) => (
-              <button
-                key={forecast.quarter}
-                onClick={() => setActiveQuarter(index)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                  activeQuarter === index
-                    ? 'bg-accent text-background'
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-              >
-                {forecast.quarter}
-              </button>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Timeline visual */}
-        <div className="relative mb-12">
-          <div className="absolute left-0 right-0 top-1/2 h-1 bg-white/10 rounded-full" />
-          <div className="flex justify-between relative">
+          {/* Progress line */}
+          <div className="absolute left-0 right-0 top-6 h-0.5 bg-white/10 hidden md:block" />
+          <motion.div 
+            className="absolute left-0 top-6 h-0.5 bg-gradient-to-r from-accent to-accent/50 hidden md:block"
+            initial={{ width: '0%' }}
+            animate={{ width: `${(activeQuarter / (forecasts.length - 1)) * 100}%` }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+          />
+          
+          {/* Quarter buttons */}
+          <div className="flex justify-between md:justify-around relative">
             {forecasts.map((forecast, index) => (
               <motion.button
                 key={forecast.quarter}
                 onClick={() => setActiveQuarter(index)}
-                className="relative"
-                whileHover={{ scale: 1.1 }}
+                className="group flex flex-col items-center gap-2 relative z-10"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 <motion.div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-                    index <= activeQuarter
-                      ? 'bg-accent shadow-glow'
-                      : 'bg-white/10'
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl transition-all duration-300 ${
+                    activeQuarter === index
+                      ? 'bg-accent shadow-glow shadow-accent/40'
+                      : 'bg-white/5 hover:bg-white/10 border border-white/10'
                   }`}
                   animate={{
-                    scale: activeQuarter === index ? 1.2 : 1,
+                    scale: activeQuarter === index ? 1.1 : 1,
                   }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 >
-                  {index < activeQuarter ? (
-                    <span className="text-background text-sm">✓</span>
-                  ) : (
-                    <span className={`text-xs ${activeQuarter === index ? 'text-background' : 'text-text-secondary'}`}>
-                      {index + 1}
-                    </span>
-                  )}
+                  <span className={activeQuarter === index ? 'grayscale-0' : 'grayscale opacity-60 group-hover:opacity-80'}>
+                    {quarterIcons[index]}
+                  </span>
                 </motion.div>
-                <span className="absolute top-10 left-1/2 -translate-x-1/2 text-xs text-text-muted whitespace-nowrap">
-                  {forecast.quarter}
-                </span>
+                <div className="text-center">
+                  <span className={`block text-sm font-medium transition-colors ${
+                    activeQuarter === index ? 'text-accent' : 'text-text-secondary group-hover:text-text-primary'
+                  }`}>
+                    {forecast.quarter}
+                  </span>
+                  <span className="hidden md:block text-xs text-text-muted mt-0.5">
+                    {quarterNames[index]}
+                  </span>
+                </div>
               </motion.button>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Forecast content */}
         <AnimatePresence mode="wait">
@@ -102,25 +101,38 @@ export function ForecastSection({ forecasts, isPaid }: ForecastSectionProps) {
           >
             {/* Blur overlay for unpaid content */}
             {!isPaid && activeQuarter > 0 && (
-              <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex items-center justify-center">
-                <div className="text-center">
-                  <span className="text-4xl mb-3 block">🔒</span>
-                  <span className="text-text-secondary mb-4 block">Розблокуйте повний прогноз</span>
-                  <button className="btn-primary text-sm">
-                    Отримати доступ
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-md z-10 flex items-center justify-center">
+                <motion.div 
+                  className="text-center p-6"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-7 h-7 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  <p className="text-text-primary font-medium mb-1">Прогноз на {forecasts[activeQuarter].quarter}</p>
+                  <p className="text-text-muted text-sm mb-4">Доступний у повній версії звіту</p>
+                  <button onClick={onUnlockClick} className="btn-primary text-sm px-6">
+                    Розблокувати
                   </button>
-                </div>
+                </motion.div>
               </div>
             )}
 
-            <div className="text-center mb-6">
-              <span className="text-4xl mb-3 block">
-                {activeQuarter === 0 ? '🌱' : activeQuarter === 1 ? '🌸' : activeQuarter === 2 ? '☀️' : '🍂'}
-              </span>
-              <h3 className="text-2xl font-bold text-text-primary mb-2">
-                {forecasts[activeQuarter].title}
-              </h3>
-              <p className="text-text-secondary">
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-2xl">{quarterIcons[activeQuarter]}</span>
+                <div>
+                  <h3 className="text-xl md:text-2xl font-bold text-text-primary">
+                    {forecasts[activeQuarter].title}
+                  </h3>
+                  <span className="text-sm text-text-muted">{quarterNames[activeQuarter]}</span>
+                </div>
+              </div>
+              <p className="text-text-secondary leading-relaxed">
                 {forecasts[activeQuarter].description}
               </p>
             </div>

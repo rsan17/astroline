@@ -79,26 +79,57 @@ User Data → Groq (primary) → Report
 ## Project Structure
 
 ```
-src/
-├── app/
-│   ├── api/
-│   │   └── generate-report/  # AI report generation endpoint
-│   ├── quiz/                 # Quiz flow
-│   ├── report/               # Report display
-│   └── zodiac/               # Zodiac sign pages
-├── components/
-│   ├── landing/              # Landing page components
-│   ├── quiz/                 # Quiz step components
-│   ├── report/               # Report section components
-│   └── ui/                   # Reusable UI components
-├── lib/
-│   ├── ai/                   # AI service layer
-│   │   ├── astro-report.ts   # Main AI generation
-│   │   ├── prompts.ts        # AI prompts
-│   │   └── index.ts          # Exports
-│   └── report-data.ts        # Static fallback data
-└── types/
-    └── report.ts             # TypeScript types
+astroline/
+├── docs/                     # 📚 Вся документація проекту
+│   ├── START_HERE.md         # Початок роботи
+│   ├── QUICK_START.md        # Швидкий старт
+│   ├── LOCAL_SETUP.md        # Локальне налаштування
+│   ├── DEPLOYMENT_GUIDE.md   # Деплой на Vercel
+│   ├── API_KEYS_SETUP.md     # Налаштування API ключів
+│   ├── MONOBANK_SETUP.md     # Інтеграція Monobank
+│   ├── RESEND_SETUP_GUIDE.md # Email сервіс
+│   └── ...                   # Інші гайди
+│
+├── scripts/                  # 🔧 PowerShell скрипти
+│   ├── deploy.ps1            # Деплой скрипт
+│   ├── deploy-fix.ps1        # Виправлення деплою
+│   ├── setup-github.ps1      # GitHub налаштування
+│   └── open-site.ps1         # Відкрити сайт
+│
+├── src/
+│   ├── app/                  # 📱 Next.js App Router
+│   │   ├── api/              # API endpoints
+│   │   ├── quiz/             # Quiz flow
+│   │   ├── report/           # Report display
+│   │   ├── zodiac/           # Zodiac sign pages
+│   │   ├── horoscope/        # Horoscope pages
+│   │   └── compatibility/    # Compatibility calculator
+│   │
+│   ├── components/           # 🧩 React компоненти
+│   │   ├── effects/          # Візуальні ефекти (Galaxy, etc)
+│   │   ├── features/         # Feature компоненти
+│   │   ├── landing/          # Landing page секції
+│   │   ├── quiz/             # Quiz step компоненти
+│   │   ├── report/           # Report секції
+│   │   ├── seo/              # SEO компоненти
+│   │   ├── shared/           # Спільні компоненти
+│   │   └── ui/               # UI kit (Button, Card, etc)
+│   │
+│   ├── hooks/                # 🎣 React hooks
+│   ├── emails/               # 📧 Email templates
+│   ├── lib/                  # 📦 Утиліти та сервіси
+│   │   ├── ai/               # AI service layer
+│   │   ├── constants/        # Константи
+│   │   ├── design/           # Design system docs
+│   │   ├── i18n/             # Локалізація (uk/en)
+│   │   └── quiz/             # Quiz логіка
+│   │
+│   └── types/                # 📝 TypeScript типи
+│
+├── public/                   # 🖼️ Статичні файли
+├── README.md                 # Цей файл
+├── env.example               # Приклад .env файлу
+└── package.json              # Dependencies
 ```
 
 ## Scripts
@@ -111,12 +142,47 @@ npm run lint         # Run ESLint
 npm run type-check   # Run TypeScript check
 ```
 
+## Documentation
+
+Вся документація знаходиться в папці `docs/`:
+
+### 📚 Основні документи
+| Документ | Опис |
+|----------|------|
+| [START_HERE.md](docs/START_HERE.md) | 🚀 Початок роботи з проектом |
+| [QUICK_START.md](docs/QUICK_START.md) | ⚡ Швидкий старт |
+| [PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) | 📋 Огляд проекту |
+| [IDEAS.md](docs/IDEAS.md) | 💡 Ідеї для розвитку |
+
+### 🔧 Налаштування (`docs/setup/`)
+| Документ | Опис |
+|----------|------|
+| [LOCAL_SETUP.md](docs/setup/LOCAL_SETUP.md) | 💻 Локальне налаштування |
+| [API_KEYS_SETUP.md](docs/setup/API_KEYS_SETUP.md) | 🔑 Налаштування API ключів |
+| [MONOBANK_SETUP.md](docs/setup/MONOBANK_SETUP.md) | 💳 Інтеграція Monobank |
+| [RESEND_SETUP_GUIDE.md](docs/setup/RESEND_SETUP_GUIDE.md) | 📧 Email сервіс |
+
+### 🚀 Деплой (`docs/deployment/`)
+| Документ | Опис |
+|----------|------|
+| [DEPLOYMENT_GUIDE.md](docs/deployment/DEPLOYMENT_GUIDE.md) | 📖 Повний гайд з деплою |
+| [DEPLOY_NOW.md](docs/deployment/DEPLOY_NOW.md) | ⚡ Швидкий деплой |
+| [VERCEL_SETUP_CHECKLIST.md](docs/deployment/VERCEL_SETUP_CHECKLIST.md) | ✅ Чеклист Vercel |
+
+### 📊 Аналіз (`docs/analysis/`)
+| Документ | Опис |
+|----------|------|
+| [SECURITY_CHECK.md](docs/analysis/SECURITY_CHECK.md) | 🔒 Перевірка безпеки |
+| [SALES_FUNNEL_IMPLEMENTATION.md](docs/analysis/SALES_FUNNEL_IMPLEMENTATION.md) | 📈 Sales funnel |
+
 ## Deploy on Vercel
 
 1. Push your code to GitHub
 2. Import project in [Vercel](https://vercel.com/new)
 3. Add environment variables in Vercel dashboard
 4. Deploy!
+
+> 📖 Детальніше: [DEPLOYMENT_GUIDE.md](docs/deployment/DEPLOYMENT_GUIDE.md)
 
 ## License
 

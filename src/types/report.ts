@@ -9,13 +9,30 @@ export interface ZodiacSign {
   dateRange: string;
 }
 
+// Unknown sign placeholder for when birth time/place not provided
+export interface UnknownSign {
+  isUnknown: true;
+  reason: 'no_birth_time' | 'no_birth_place';
+}
+
 export interface NatalChart {
   sunSign: ZodiacSign;
-  moonSign: ZodiacSign;
-  risingSign: ZodiacSign;
+  moonSign: ZodiacSign | UnknownSign;
+  risingSign: ZodiacSign | UnknownSign;
   sunDescription: string;
-  moonDescription: string;
-  risingDescription: string;
+  moonDescription: string | null;
+  risingDescription: string | null;
+}
+
+// Numerology types
+export interface NumerologyData {
+  lifePathNumber: number;
+  lifePathMeaning: string;
+  birthdayNumber: number;
+  birthdayMeaning: string;
+  isMasterNumber: boolean;
+  personalYear2026: number;
+  personalYearMeaning: string;
 }
 
 export interface PersonalityTrait {
@@ -68,10 +85,15 @@ export interface PalmReading {
 
 export interface LuckyAttributes {
   numbers: number[];
+  numbersExplanation?: string;
   days: string[];
+  daysExplanation?: string;
   colors: string[];
+  colorsExplanation?: string;
   gems: string[];
+  gemsExplanation?: string;
   direction: string;
+  directionExplanation?: string;
 }
 
 export interface FullReport {
@@ -85,6 +107,7 @@ export interface FullReport {
     birthPlace?: string;
   };
   natalChart: NatalChart;
+  numerology?: NumerologyData;
   personality: PersonalityTrait[];
   forecast2026: QuarterlyForecast[];
   love: LoveSection;
@@ -94,3 +117,7 @@ export interface FullReport {
   isPaid: boolean;
 }
 
+// Helper type guard to check if sign is unknown
+export function isUnknownSign(sign: ZodiacSign | UnknownSign): sign is UnknownSign {
+  return 'isUnknown' in sign && sign.isUnknown === true;
+}

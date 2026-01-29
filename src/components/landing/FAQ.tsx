@@ -48,7 +48,7 @@ export function FAQ() {
             <HelpCircle className="w-7 h-7 text-accent" />
           </motion.div>
           
-          <span className="text-accent text-sm font-medium uppercase tracking-wider mb-4 block">
+          <span className="text-text-secondary text-sm font-medium uppercase tracking-wider mb-4 block">
             {t.faq.label}
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
@@ -108,7 +108,7 @@ export function FAQ() {
                 >
                   <span className={cn(
                     'font-semibold text-sm sm:text-base transition-colors',
-                    openIndex === index ? 'text-accent' : 'text-text-primary group-hover:text-accent'
+                    openIndex === index ? 'text-text-primary' : 'text-text-primary group-hover:text-white'
                   )}>
                     {faq.question}
                   </span>

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
 import { useQuizProgress, useQuizStore } from '@/hooks/useQuizStore';
 import { cn } from '@/lib/utils';
+import { useTranslations } from '@/lib/i18n';
 
 interface QuizProgressProps {
   showBack?: boolean;
@@ -21,6 +22,7 @@ const STEP_GROUPS = [
 export function QuizProgress({ showBack = true, className }: QuizProgressProps) {
   const { current, total, percentage } = useQuizProgress();
   const { prevStep, currentStep } = useQuizStore();
+  const { t } = useTranslations();
 
   const getSegmentProgress = (group: typeof STEP_GROUPS[0]) => {
     if (current < group.start) return 0;
@@ -38,10 +40,10 @@ export function QuizProgress({ showBack = true, className }: QuizProgressProps) 
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             onClick={() => prevStep()}
-            className="flex items-center gap-1 text-sm text-text-secondary hover:text-accent transition-colors p-2 -ml-2 rounded-lg hover:bg-white/5"
+            className="flex items-center gap-1 text-sm text-text-secondary hover:text-white transition-colors p-2 -ml-2 rounded-lg hover:bg-white/5"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span>Back</span>
+            <span>{t.quiz.back}</span>
           </motion.button>
         ) : (
           <div />
@@ -52,9 +54,9 @@ export function QuizProgress({ showBack = true, className }: QuizProgressProps) 
           animate={{ opacity: 1 }}
           className="flex items-center gap-2 text-sm"
         >
-          <span className="text-text-secondary">Step</span>
-          <span className="text-accent font-semibold">{current}</span>
-          <span className="text-text-muted">of {total}</span>
+          <span className="text-text-secondary">{t.quiz.progress.step}</span>
+          <span className="text-white font-semibold">{current}</span>
+          <span className="text-text-muted">{t.quiz.progress.of} {total}</span>
         </motion.div>
       </div>
 

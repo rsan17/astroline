@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { monobank } from '@/lib/monobank';
+import { updateReportPaidStatus } from '@/lib/report-store';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -20,16 +20,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/?payment=error', origin));
   }
 
-  // Optionally verify payment status with Monobank
-  // Note: The webhook might not have arrived yet, so we also check here
-  if (reference) {
-    try {
-      // Try to find invoice ID from reference (need to store mapping in production)
-      // For now, we trust the redirect parameters since they come from Monobank
-      console.log('✅ Payment redirect received, user will see success page');
-    } catch (error) {
-      console.error('Error checking payment status:', error);
+  // Update report paid status in database
+  // Note: The webhook might not have arrived yet, so we also update here
+  try {
+    const result = await updateReportPaidStatus(reportId, true);
+    if (result.success) {
+      console.log(`🔓 Report ${reportId} unlocked in database`);
+    } else {
+      console.warn(`⚠️ Could not unlock report in database: ${result.error}`);
     }
+  } catch (error) {
+    console.error('Error updating report status:', error);
   }
 
   console.log(`✅ Redirecting to payment success page`);

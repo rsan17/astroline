@@ -24,6 +24,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get base URL for redirects
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    
+    // Create unique reference for this payment
+    const reference = `ASTRO-${reportId}-${Date.now()}`;
+
+    // 🧪 TEST MODE: Skip payment for testing
+    if (process.env.SKIP_PAYMENT === 'true') {
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('🧪 TEST MODE: Skipping payment');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log(`📧 Email: ${email || 'not provided'}`);
+      console.log(`📋 Plan: ${plan.name} (${plan.priceUAH} UAH) - FREE FOR TESTING`);
+      console.log(`🔗 Reference: ${reference}`);
+      console.log(`📄 Report ID: ${reportId}`);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+      // Return fake success URL that goes directly to success page
+      const successUrl = `${origin}/api/monobank/success?reportId=${reportId}&reference=${reference}`;
+      
+      return NextResponse.json({
+        success: true,
+        invoiceId: `TEST-${Date.now()}`,
+        pageUrl: successUrl,
+        reference,
+        testMode: true,
+      });
+    }
+
     // Check if Monobank is configured
     if (!monobank.isConfigured()) {
       console.error('❌ Monobank is not configured');
@@ -32,12 +61,6 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-
-    // Get base URL for redirects
-    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    
-    // Create unique reference for this payment
-    const reference = `ASTRO-${reportId}-${Date.now()}`;
 
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('💳 Creating Monobank Payment');

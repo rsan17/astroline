@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { Check, Star, Sparkles, Crown, Loader2, Lock, Clock, Shield, Zap } from 'lucide-react';
@@ -9,24 +9,15 @@ import { Button } from '@/components/ui/Button';
 import { LaserFlowButton } from '@/components/effects';
 import { cn } from '@/lib/utils';
 import { AnimatePresence } from 'framer-motion';
-import { useTranslations } from '@/lib/i18n';
+import { useTranslations, useLocale } from '@/lib/i18n';
 
-const generatingPhrases = [
-  { text: 'Reading the stars...', icon: '✨' },
-  { text: 'Decoding natal chart...', icon: '🌙' },
-  { text: 'Analyzing planet positions...', icon: '🪐' },
-  { text: 'Aligning energies...', icon: '🔮' },
-  { text: 'Composing your forecast...', icon: '📜' },
-  { text: 'Generating report...', icon: '⭐' },
-];
-
-// Teaser sections that show blurred previews
-const TEASER_SECTIONS = [
-  { title: 'Natal Chart', preview: 'Your Sun in Sagittarius brings...', unlocked: true },
-  { title: '2026 Forecast', preview: 'Q1: A period of transformation awaits...', unlocked: false },
-  { title: 'Love Compatibility', preview: 'Best match with Aries, Leo...', unlocked: false },
-  { title: 'Career Guidance', preview: 'Your leadership qualities...', unlocked: false },
-];
+// Teaser sections keys for translations
+const TEASER_SECTION_KEYS = [
+  { key: 'natalChart', unlocked: true },
+  { key: 'forecast', unlocked: false },
+  { key: 'loveCompatibility', unlocked: false },
+  { key: 'careerGuidance', unlocked: false },
+] as const;
 
 const plans = [
   {
@@ -80,14 +71,15 @@ const plans = [
 
 export function PaywallStep() {
   const router = useRouter();
-  const { t } = useTranslations();
-  const { data, prevStep, setReportId } = useQuizStore();
+  const { t, locale } = useTranslations();
+  const { data, prevStep, setReportId, reportId: storedReportId } = useQuizStore();
   const [selectedPlan, setSelectedPlan] = useState('trial_2w');
   const [isLoading, setIsLoading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(true);
-  const [reportId, setLocalReportId] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(!storedReportId); // Don't generate if we already have one
+  const [reportId, setLocalReportId] = useState<string | null>(storedReportId || null);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [countdown, setCountdown] = useState(15 * 60); // 15 minutes in seconds
+  const isGeneratingRef = useRef(false); // Prevent double generation in StrictMode
 
   // Countdown timer for urgency
   useEffect(() => {
@@ -111,15 +103,25 @@ export function PaywallStep() {
     if (!isGenerating) return;
 
     const interval = setInterval(() => {
-      setPhraseIndex((prev) => (prev + 1) % generatingPhrases.length);
+      setPhraseIndex((prev) => (prev + 1) % t.quiz.paywall.phrases.length);
     }, 1500);
 
     return () => clearInterval(interval);
-  }, [isGenerating]);
+  }, [isGenerating, t.quiz.paywall.phrases.length]);
 
-  // Generate report on mount
+  // Generate report on mount (only once)
   useEffect(() => {
+    // Skip if we already have a report ID or if already generating
+    if (storedReportId || isGeneratingRef.current) {
+      setIsGenerating(false);
+      return;
+    }
+
     const generateReport = async () => {
+      // Prevent double generation in React StrictMode
+      if (isGeneratingRef.current) return;
+      isGeneratingRef.current = true;
+      
       setIsGenerating(true);
       try {
         const response = await fetch('/api/generate-report', {
@@ -140,6 +142,8 @@ export function PaywallStep() {
             relationshipStatus: data.relationshipStatus,
             favoriteColor: data.favoriteColor,
             element: data.element,
+            // Language for report generation
+            locale: locale,
           }),
         });
 
@@ -168,12 +172,24 @@ export function PaywallStep() {
     };
 
     generateReport();
-  }, [data, setReportId]);
+  }, [data, setReportId, storedReportId, locale]);
 
   const handlePurchase = async () => {
+    console.log('🛒 handlePurchase called');
+    console.log('📋 Report ID:', reportId);
+    console.log('📦 Selected plan:', selectedPlan);
+    
+    if (!reportId) {
+      console.error('❌ No report ID available');
+      alert('Звіт ще генерується. Зачекайте кілька секунд і спробуйте знову.');
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
+      console.log('📤 Sending request to /api/monobank/create-payment...');
+      
       // Create payment via Monobank
       const response = await fetch('/api/monobank/create-payment', {
         method: 'POST',
@@ -188,7 +204,9 @@ export function PaywallStep() {
         }),
       });
 
+      console.log('📥 Response status:', response.status);
       const result = await response.json();
+      console.log('📥 Response data:', result);
 
       if (!response.ok || !result.success) {
         throw new Error(result.error || 'Failed to create payment');
@@ -203,11 +221,12 @@ export function PaywallStep() {
         }));
       }
 
+      console.log('🔗 Redirecting to:', result.pageUrl);
       // Redirect to Monobank payment page
       window.location.href = result.pageUrl;
 
     } catch (error) {
-      console.error('Payment error:', error);
+      console.error('❌ Payment error:', error);
       // Show error to user (you could add a toast notification here)
       alert(error instanceof Error ? error.message : 'Помилка оплати. Спробуйте ще раз.');
       setIsLoading(false);
@@ -236,7 +255,7 @@ export function PaywallStep() {
         >
           <Sparkles className="w-12 h-12 sm:w-16 sm:h-16 text-gold mx-auto" />
         </motion.div>
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold gradient-text mb-2 sm:mb-3">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 sm:mb-3">
           {t.quiz.paywall.title}
         </h2>
         <p className="text-sm sm:text-base text-text-secondary">
@@ -253,7 +272,7 @@ export function PaywallStep() {
         >
           <Clock className="w-4 h-4 text-gold" />
           <span className="text-sm text-gold font-medium">
-            Special offer expires in {formatTime(countdown)}
+            {t.quiz.paywall.specialOffer} {formatTime(countdown)}
           </span>
         </motion.div>
       )}
@@ -271,12 +290,12 @@ export function PaywallStep() {
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-text-secondary">{t.quiz.paywall.yourSign}:</span>
-          <span className="text-accent font-medium">{data.sunSign || 'Leo'} ☀️</span>
+          <span className="text-white font-medium">{data.sunSign || 'Leo'} ☀️</span>
         </div>
 
         {/* Teaser sections preview */}
         <div className="pt-3 border-t border-white/10 space-y-2">
-          {TEASER_SECTIONS.map((section, i) => (
+          {TEASER_SECTION_KEYS.map((section, i) => (
             <div
               key={i}
               className={cn(
@@ -294,11 +313,11 @@ export function PaywallStep() {
                   'text-sm',
                   section.unlocked ? 'text-text-primary' : 'text-text-secondary'
                 )}>
-                  {section.title}
+                  {t.quiz.paywall.teaserSections[section.key]}
                 </span>
               </div>
               {!section.unlocked && (
-                <span className="text-xs text-accent">Unlock</span>
+                <span className="text-xs text-accent">{t.quiz.paywall.unlock}</span>
               )}
             </div>
           ))}
@@ -315,7 +334,7 @@ export function PaywallStep() {
             transition={{ delay: 0.3 + index * 0.1 }}
             onClick={() => setSelectedPlan(plan.id)}
             className={cn(
-              'w-full glass rounded-2xl p-4 sm:p-5 text-left transition-all duration-300 relative overflow-hidden',
+              'w-full glass rounded-2xl p-5 sm:p-6 text-left transition-all duration-300 relative overflow-hidden',
               selectedPlan === plan.id && 'ring-2 ring-accent border-accent/50',
               plan.popular && 'border-accent/30'
             )}
@@ -346,7 +365,7 @@ export function PaywallStep() {
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
-                  <span className="text-xl sm:text-2xl font-bold text-accent">
+                  <span className="text-xl sm:text-2xl font-bold text-white">
                     {plan.price}
                   </span>
                   {plan.originalPrice && (
@@ -406,8 +425,8 @@ export function PaywallStep() {
               className="flex items-center justify-center gap-2"
             >
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span>{generatingPhrases[phraseIndex].icon}</span>
-              <span>{generatingPhrases[phraseIndex].text}</span>
+              <span>{t.quiz.paywall.phrasesIcons[phraseIndex]}</span>
+              <span>{t.quiz.paywall.phrases[phraseIndex]}</span>
             </motion.span>
           </Button>
         ) : (
@@ -428,7 +447,7 @@ export function PaywallStep() {
         <button
           onClick={handleViewFreeReport}
           disabled={isGenerating || !reportId}
-          className="w-full text-sm text-accent hover:text-accent-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed py-2"
+          className="w-full text-sm text-white/80 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed py-2"
         >
           {isGenerating ? (
             <span className="flex items-center justify-center gap-2">
@@ -460,14 +479,6 @@ export function PaywallStep() {
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5">
           <Shield className="w-4 h-4 text-green-500" />
           <span className="text-xs text-text-secondary">{t.quiz.paywall.trustBadges.secure}</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5">
-          <span className="text-sm">🏦</span>
-          <span className="text-xs text-text-secondary">monobank</span>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5">
-          <span className="text-sm">💳</span>
-          <span className="text-xs text-text-secondary">Visa / Mastercard</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5">
           <span className="text-sm">↩️</span>

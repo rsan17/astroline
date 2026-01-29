@@ -32,7 +32,7 @@ export function HowItWorks() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-accent text-sm font-medium uppercase tracking-wider mb-4 block">
+          <span className="text-text-secondary text-sm font-medium uppercase tracking-wider mb-4 block">
             {t.howItWorks.label}
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">

@@ -7,6 +7,7 @@ import type { LoveSection as LoveSectionType } from '@/types/report';
 interface LoveSectionProps {
   love: LoveSectionType;
   isPaid: boolean;
+  onUnlockClick?: () => void;
 }
 
 const containerVariants = {
@@ -26,7 +27,7 @@ const itemVariants = {
   },
 };
 
-export function LoveSection({ love, isPaid }: LoveSectionProps) {
+export function LoveSection({ love, isPaid, onUnlockClick }: LoveSectionProps) {
   return (
     <section className="py-20 px-4 relative overflow-hidden">
       {/* Background effects */}
@@ -152,7 +153,7 @@ export function LoveSection({ love, isPaid }: LoveSectionProps) {
           className="relative"
         >
           <h3 className="text-2xl font-bold text-text-primary mb-8 text-center">
-            💕 Найкраща сумісність
+            Найкраща сумісність
           </h3>
 
           <div className={`grid md:grid-cols-3 gap-5 relative ${!isPaid ? 'select-none' : ''}`}>
@@ -161,16 +162,20 @@ export function LoveSection({ love, isPaid }: LoveSectionProps) {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-2xl"
+                className="absolute inset-0 bg-background/80 backdrop-blur-md z-10 flex flex-col items-center justify-center rounded-2xl"
               >
-                <Lock className="w-10 h-10 text-text-muted mb-4" />
-                <span className="text-text-secondary mb-6">Розблокуйте сумісність</span>
+                <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+                  <Lock className="w-7 h-7 text-text-muted" />
+                </div>
+                <p className="text-text-primary font-medium mb-1">Сумісність знаків</p>
+                <p className="text-text-muted text-sm mb-4">Доступна у повній версії звіту</p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
-                  className="btn-primary"
+                  onClick={onUnlockClick}
+                  className="btn-primary text-sm px-6"
                 >
-                  Отримати доступ
+                  Розблокувати
                 </motion.button>
               </motion.div>
             )}
@@ -233,7 +238,7 @@ export function LoveSection({ love, isPaid }: LoveSectionProps) {
               <Sparkles className="w-6 h-6 text-pink-400" />
             </div>
             <div>
-              <h4 className="font-bold text-text-primary text-lg mb-2">💝 Порада на 2026 рік</h4>
+              <h4 className="font-bold text-text-primary text-lg mb-2">Порада на 2026 рік</h4>
               <p className="text-text-secondary leading-relaxed">{love.advice}</p>
             </div>
           </div>

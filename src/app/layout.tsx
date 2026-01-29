@@ -121,8 +121,8 @@ export default function RootLayout({
           </defs>
         </svg>
         
-        {/* PreLoader */}
-        <PreLoader />
+        {/* PreLoader - temporarily disabled due to loading bug */}
+        {/* <PreLoader /> */}
         
         {/* Ghost cursor effect - desktop only */}
         <GhostCursorGlow />

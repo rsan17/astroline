@@ -221,6 +221,18 @@ interface AIGeneratedContent {
     warningPeriods: string[];
     actionSteps?: string[];
   };
+  lucky?: {
+    numbers: number[];
+    numbersExplanation?: string;
+    days: string[];
+    daysExplanation?: string;
+    colors: string[];
+    colorsExplanation?: string;
+    gems: string[];
+    gemsExplanation?: string;
+    direction: string;
+    directionExplanation?: string;
+  };
 }
 
 // AI generation result with provider tracking
@@ -378,8 +390,8 @@ export async function generateAstroReportWithAI(
     birthTime?: string;
     birthPlace?: string;
     sunSign: string;
-    moonSign: string;
-    risingSign: string;
+    moonSign?: string;
+    risingSign?: string;
     goals?: string[];
     relationshipStatus?: string;
     favoriteColor?: string;
@@ -391,7 +403,8 @@ export async function generateAstroReportWithAI(
     bigChanges: boolean;
     wealthIndicator: string;
   },
-  isPaid: boolean = false
+  isPaid: boolean = false,
+  lang: 'uk' | 'en' = 'uk'
 ): Promise<GenerateReportResult> {
   // Step 1: Verify birth date matches zodiac sign (MANDATORY)
   const verificationResult = verifyZodiacSignFromDate(userData.birthDate, userData.sunSign);
@@ -411,6 +424,14 @@ export async function generateAstroReportWithAI(
     console.warn(`Astrological properties verification issues for ${correctedSunSign}:`, propertiesResult.errors);
   }
 
+  // Determine if Moon/Rising signs can be calculated
+  const hasBirthTime = !!userData.birthTime;
+  const hasBirthPlace = !!userData.birthPlace;
+  
+  // Moon sign requires birth time, Rising requires birth place
+  const effectiveMoonSign = hasBirthTime ? (userData.moonSign || null) : null;
+  const effectiveRisingSign = hasBirthPlace ? (userData.risingSign || null) : null;
+
   // Always generate static report as base/fallback (using corrected sign)
   const staticReport = generateStaticReport(
     reportId,
@@ -421,11 +442,12 @@ export async function generateAstroReportWithAI(
       birthTime: userData.birthTime,
       birthPlace: userData.birthPlace,
       sunSign: correctedSunSign, // Use corrected sign
-      moonSign: userData.moonSign || correctedSunSign,
-      risingSign: userData.risingSign || correctedSunSign,
+      moonSign: effectiveMoonSign,
+      risingSign: effectiveRisingSign,
     },
     palmData,
-    isPaid
+    isPaid,
+    lang
   );
 
   // Try to enhance with AI (using corrected sign)
@@ -435,12 +457,13 @@ export async function generateAstroReportWithAI(
     birthTime: userData.birthTime,
     birthPlace: userData.birthPlace,
     sunSign: correctedSunSign, // Use corrected sign
-    moonSign: userData.moonSign || correctedSunSign,
-    risingSign: userData.risingSign || correctedSunSign,
+    moonSign: effectiveMoonSign || 'невідомо',
+    risingSign: effectiveRisingSign || 'невідомо',
     goals: userData.goals,
     relationshipStatus: userData.relationshipStatus,
     favoriteColor: userData.favoriteColor,
     element: userData.element,
+    lang,
   });
 
   // If AI failed, return static report
@@ -516,6 +539,19 @@ export async function generateAstroReportWithAI(
       financeTips: aiContent.career.financeTips,
       yearFocus: aiContent.career.opportunities2026,
     },
+    // Merge AI-generated lucky attributes if available
+    lucky: aiContent.lucky ? {
+      numbers: aiContent.lucky.numbers || staticReport.lucky.numbers,
+      numbersExplanation: aiContent.lucky.numbersExplanation,
+      days: aiContent.lucky.days || staticReport.lucky.days,
+      daysExplanation: aiContent.lucky.daysExplanation,
+      colors: aiContent.lucky.colors || staticReport.lucky.colors,
+      colorsExplanation: aiContent.lucky.colorsExplanation,
+      gems: aiContent.lucky.gems || staticReport.lucky.gems,
+      gemsExplanation: aiContent.lucky.gemsExplanation,
+      direction: aiContent.lucky.direction || staticReport.lucky.direction,
+      directionExplanation: aiContent.lucky.directionExplanation,
+    } : staticReport.lucky,
   };
 
   return { report: enhancedReport, provider: aiResult.provider };

@@ -103,7 +103,7 @@ export function Testimonials() {
             <MessageCircle className="w-7 h-7 text-accent" />
           </motion.div>
           
-          <span className="text-accent text-sm font-medium uppercase tracking-wider mb-4 block">
+          <span className="text-text-secondary text-sm font-medium uppercase tracking-wider mb-4 block">
             {t.testimonials?.label || 'Відгуки'}
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4">

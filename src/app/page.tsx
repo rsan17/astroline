@@ -71,7 +71,7 @@ export default function LandingPage() {
             className="flex items-center gap-2 text-lg md:text-xl font-bold"
           >
             <Sparkles className="w-5 h-5 text-gold" />
-            <span className="gradient-text">Astroline</span>
+            <span className="text-white">Astroline</span>
           </motion.a>
 
           <div className="flex items-center gap-3 sm:gap-4">
@@ -123,7 +123,7 @@ export default function LandingPage() {
             <div className="sm:col-span-2 lg:col-span-1">
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-5 h-5 text-gold" />
-                <span className="text-xl font-bold gradient-text">{t.footer.brand}</span>
+                <span className="text-xl font-bold text-white">{t.footer.brand}</span>
               </div>
               <p className="text-text-secondary text-sm mb-4">
                 {t.footer.tagline}

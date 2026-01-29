@@ -2,14 +2,15 @@
 
 import { motion } from 'framer-motion';
 import type { PalmReading } from '@/types/report';
-import { Hand, Heart, Brain, Sparkles } from 'lucide-react';
+import { Hand, Heart, Brain, Sparkles, Lock } from 'lucide-react';
 
 interface PalmSectionProps {
   palmReading?: PalmReading;
   isPaid: boolean;
+  onUnlockClick?: () => void;
 }
 
-export function PalmSection({ palmReading, isPaid }: PalmSectionProps) {
+export function PalmSection({ palmReading, isPaid, onUnlockClick }: PalmSectionProps) {
   if (!palmReading) {
     return (
       <section className="py-20 px-4">
@@ -67,8 +68,18 @@ export function PalmSection({ palmReading, isPaid }: PalmSectionProps) {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
+          <motion.div
+            initial={{ scale: 0 }}
+            whileInView={{ scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ type: 'spring', bounce: 0.5 }}
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 mb-6"
+          >
+            <Hand className="w-8 h-8 text-indigo-400" />
+          </motion.div>
+          
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            🖐️ <span className="gradient-text">Аналіз долоні</span>
+            <span className="gradient-text">Аналіз долоні</span>
           </h2>
           <p className="text-text-secondary max-w-2xl mx-auto">
             Що розповідають лінії вашої долоні
@@ -159,15 +170,22 @@ export function PalmSection({ palmReading, isPaid }: PalmSectionProps) {
         <div className={`grid md:grid-cols-3 gap-6 mb-8 relative ${!isPaid ? 'select-none' : ''}`}>
           {/* Blur overlay */}
           {!isPaid && (
-            <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex items-center justify-center rounded-2xl">
-              <div className="text-center">
-                <span className="text-4xl mb-3 block">🔒</span>
-                <span className="text-text-secondary mb-4 block">Розблокуйте аналіз ліній</span>
-                <button className="btn-primary text-sm">
-                  Отримати доступ
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute inset-0 bg-background/80 backdrop-blur-md z-10 flex items-center justify-center rounded-2xl"
+            >
+              <div className="text-center p-6">
+                <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
+                  <Lock className="w-7 h-7 text-text-muted" />
+                </div>
+                <p className="text-text-primary font-medium mb-1">Аналіз ліній долоні</p>
+                <p className="text-text-muted text-sm mb-4">Доступний у повній версії звіту</p>
+                <button onClick={onUnlockClick} className="btn-primary text-sm px-6">
+                  Розблокувати
                 </button>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {palmLines.map((line, index) => (
@@ -197,12 +215,18 @@ export function PalmSection({ palmReading, isPaid }: PalmSectionProps) {
         >
           {/* Blur overlay */}
           {!isPaid && (
-            <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex items-center justify-center">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute inset-0 bg-background/80 backdrop-blur-md z-10 flex items-center justify-center"
+            >
               <div className="text-center">
-                <span className="text-3xl mb-2 block">🔒</span>
+                <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-3">
+                  <Lock className="w-5 h-5 text-text-muted" />
+                </div>
                 <span className="text-sm text-text-secondary">Доступно в повній версії</span>
               </div>
-            </div>
+            </motion.div>
           )}
 
           <h4 className="font-semibold text-text-primary mb-4 flex items-center gap-2">

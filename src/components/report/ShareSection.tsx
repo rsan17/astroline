@@ -8,9 +8,13 @@ interface ShareSectionProps {
   reportId: string;
   email?: string;
   sunSign?: string;
+  moonSign?: string;
+  risingSign?: string;
+  isPaid?: boolean;
+  onUnlockClick?: () => void;
 }
 
-export function ShareSection({ reportId, email, sunSign }: ShareSectionProps) {
+export function ShareSection({ reportId, email, sunSign, moonSign, risingSign, isPaid = false, onUnlockClick }: ShareSectionProps) {
   const [isCopied, setIsCopied] = useState(false);
   const [isEmailSending, setIsEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
@@ -39,7 +43,7 @@ export function ShareSection({ reportId, email, sunSign }: ShareSectionProps) {
       const response = await fetch('/api/send-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, reportId }),
+        body: JSON.stringify({ email, reportId, sunSign, moonSign, risingSign }),
       });
       
       if (response.ok) {
@@ -76,8 +80,18 @@ export function ShareSection({ reportId, email, sunSign }: ShareSectionProps) {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
+          <motion.div
+            initial={{ scale: 0 }}
+            whileInView={{ scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ type: 'spring', bounce: 0.5 }}
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-teal-500/20 mb-6"
+          >
+            <Share2 className="w-8 h-8 text-accent" />
+          </motion.div>
+          
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            📤 <span className="gradient-text">Поділіться звітом</span>
+            <span className="gradient-text">Поділіться звітом</span>
           </h2>
           <p className="text-text-secondary">
             Надішліть звіт на email або поділіться з друзями
@@ -195,24 +209,27 @@ export function ShareSection({ reportId, email, sunSign }: ShareSectionProps) {
           </div>
         </motion.div>
 
-        {/* CTA for full report */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-8 text-center"
-        >
-          <p className="text-text-secondary mb-4">
-            Хочете отримати ще більше інсайтів?
-          </p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="btn-primary text-lg px-10"
+        {/* CTA for full report - only show if not paid */}
+        {!isPaid && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-8 text-center"
           >
-            🔮 Отримати повний звіт
-          </motion.button>
-        </motion.div>
+            <p className="text-text-secondary mb-4">
+              Хочете отримати ще більше інсайтів?
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onUnlockClick}
+              className="btn-primary text-lg px-10"
+            >
+              Отримати повний звіт
+            </motion.button>
+          </motion.div>
+        )}
       </div>
     </section>
   );
