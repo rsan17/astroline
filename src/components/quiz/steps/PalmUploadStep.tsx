@@ -429,8 +429,8 @@ export function PalmUploadStep() {
   };
 
   const handleSkip = () => {
-    // Clear any palm data and move to next step
-    updateData({ palmImageUrl: undefined });
+    // Mark as skipped so PalmAnalyzingStep knows to skip animation
+    updateData({ palmImageUrl: 'skipped' });
     nextStep();
   };
 

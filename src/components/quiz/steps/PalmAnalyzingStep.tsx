@@ -17,8 +17,8 @@ export function PalmAnalyzingStep() {
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  // If palm step was skipped, go directly to next step without animation
-  const wasSkipped = data.palmImageUrl === 'skipped';
+  // If palm step was skipped or no image uploaded, go directly to next step without animation
+  const wasSkipped = !data.palmImageUrl || data.palmImageUrl === 'skipped';
 
   useEffect(() => {
     if (wasSkipped) {

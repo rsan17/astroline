@@ -411,7 +411,7 @@ export function PaywallStep() {
         transition={{ delay: 0.7 }}
         className="space-y-4"
       >
-        {isGenerating ? (
+        {isGenerating || !reportId ? (
           <Button 
             disabled
             className="w-full text-lg py-5 relative overflow-hidden"
@@ -435,7 +435,7 @@ export function PaywallStep() {
             size="xl"
             onClick={handlePurchase}
             isLoading={isLoading}
-            disabled={isLoading}
+            disabled={isLoading || !reportId}
             className="w-full"
             rightIcon={<Zap className="w-5 h-5" />}
           >
