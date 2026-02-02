@@ -10,6 +10,13 @@ export default function MetaPixel() {
       <Script
         id="meta-pixel"
         strategy="afterInteractive"
+        onLoad={() => {
+          // Викликаємо PageView тільки після завантаження скрипта
+          if (typeof window !== 'undefined' && window.fbq && !(window as any).__fbPixelPageViewTracked) {
+            window.fbq('track', 'PageView');
+            (window as any).__fbPixelPageViewTracked = true;
+          }
+        }}
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)
@@ -21,7 +28,6 @@ export default function MetaPixel() {
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
             fbq('init', '${META_PIXEL_ID}');
-            fbq('track', 'PageView');
           `,
         }}
       />
