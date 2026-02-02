@@ -105,10 +105,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="uk" className={`${philosopher.variable} ${nunito.variable}`}>
-      <head>
-        <MetaPixel />
-      </head>
       <body className={`${nunito.className} antialiased`}>
+        <MetaPixel />
         {/* SVG Filter for PreLoader */}
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style={{ position: 'absolute', width: 0, height: 0 }}>
           <defs>
