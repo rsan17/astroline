@@ -65,7 +65,7 @@ export function WhatYouDiscover() {
                   </div>
                   <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/5 text-text-muted text-xs">
                     <Lock className="w-3 h-3" />
-                    <span>Premium</span>
+                    <span>{t.discover.premium}</span>
                   </div>
                 </div>
 
@@ -84,7 +84,7 @@ export function WhatYouDiscover() {
                     <div className="absolute inset-0 backdrop-blur-xl bg-background/90 flex items-center justify-center z-10">
                       <span className="flex items-center gap-2 text-xs text-accent">
                         <Lock className="w-3 h-3" />
-                        Unlock to reveal
+                        {t.discover.unlockToReveal}
                       </span>
                     </div>
                     

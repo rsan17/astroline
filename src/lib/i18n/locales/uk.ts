@@ -97,6 +97,8 @@ export const uk = {
       },
     ],
     cta: 'Розблокувати повний звіт',
+    premium: 'Преміум',
+    unlockToReveal: 'Розблокувати',
   },
 
   // Pricing

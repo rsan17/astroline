@@ -98,6 +98,8 @@ export const en = {
       },
     ],
     cta: 'Unlock Full Report',
+    premium: 'Premium',
+    unlockToReveal: 'Unlock to reveal',
   },
 
   // Pricing
