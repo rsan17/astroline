@@ -18,7 +18,7 @@ export function isResendConfigured(): boolean {
 
 // Email configuration
 export const EMAIL_CONFIG = {
-  from: process.env.EMAIL_FROM || 'Astroline <onboarding@resend.dev>',
-  replyTo: 'support@astrolog.cards',
+  from: process.env.EMAIL_FROM || 'Astroline <noreply@astroline.com>',
+  replyTo: 'support@astroline.com',
 };
 
