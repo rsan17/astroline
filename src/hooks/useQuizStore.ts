@@ -47,7 +47,7 @@ export interface QuizData {
 }
 
 interface QuizState {
-  // Current step (1-14)
+  // Current step (1-13)
   currentStep: number;
   
   // Quiz data
@@ -71,7 +71,7 @@ interface QuizState {
   reset: () => void;
 }
 
-const TOTAL_STEPS = 14;
+const TOTAL_STEPS = 13;
 
 const initialData: QuizData = {};
 

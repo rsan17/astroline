@@ -15,7 +15,6 @@ import { ElementStep } from './steps/ElementStep';
 import { CalculatingStep } from './steps/CalculatingStep';
 import { AstroResultStep } from './steps/AstroResultStep';
 import { PalmUploadStep } from './steps/PalmUploadStep';
-import { PalmAnalyzingStep } from './steps/PalmAnalyzingStep';
 import { EmailStep } from './steps/EmailStep';
 import { PaywallStep } from './steps/PaywallStep';
 
@@ -31,9 +30,8 @@ const stepComponents: Record<number, React.ComponentType> = {
   9: CalculatingStep,
   10: AstroResultStep,
   11: PalmUploadStep,
-  12: PalmAnalyzingStep,
-  13: EmailStep,
-  14: PaywallStep,
+  12: EmailStep,
+  13: PaywallStep,
 };
 
 export function QuizContainer() {

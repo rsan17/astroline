@@ -29,7 +29,7 @@ interface ValidationResult {
 }
 
 export function PalmUploadStep() {
-  const { updateData, nextStep, prevStep } = useQuizStore();
+  const { updateData, nextStep, prevStep, setStep } = useQuizStore();
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -424,14 +424,15 @@ export function PalmUploadStep() {
 
   const handleContinue = () => {
     if (validationResult?.isValid && preview) {
-      nextStep();
+      // Skip PalmAnalyzingStep and go directly to EmailStep (step 12)
+      setStep(12);
     }
   };
 
   const handleSkip = () => {
-    // Mark as skipped so PalmAnalyzingStep knows to skip animation
+    // Mark as skipped and go directly to EmailStep (step 12), skipping PalmAnalyzingStep
     updateData({ palmImageUrl: 'skipped' });
-    nextStep();
+    setStep(12);
   };
 
   const canContinue = validationResult?.isValid && preview;

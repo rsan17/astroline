@@ -16,12 +16,21 @@ async function generatePdfBuffer(report: FullReport): Promise<Buffer> {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('📧 Send Report Email Request');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  
   try {
     const body = await request.json();
     const { email, reportId, sunSign, moonSign, risingSign } = body;
 
+    console.log(`📄 Report ID: ${reportId}`);
+    console.log(`📧 Email: ${email}`);
+    console.log(`⭐ Signs: ${sunSign} / ${moonSign} / ${risingSign}`);
+
     // Validate required fields
     if (!email || !reportId) {
+      console.error('❌ Missing required fields');
       return NextResponse.json(
         { error: 'Email and reportId are required' },
         { status: 400 }
@@ -92,16 +101,33 @@ export async function POST(request: NextRequest) {
       ];
     }
 
+    // Check if Resend is configured
+    if (!process.env.RESEND_API_KEY) {
+      console.error('❌ RESEND_API_KEY not configured');
+      return NextResponse.json(
+        { error: 'Email service not configured' },
+        { status: 500 }
+      );
+    }
+
+    console.log('📤 Sending email via Resend...');
+    console.log(`📎 PDF attached: ${!!pdfBuffer}`);
+
     // Send email via Resend
     const { data, error } = await resend.emails.send(emailOptions);
 
     if (error) {
-      console.error('Resend error:', error);
+      console.error('❌ Resend error:', error);
+      // Preserve the original error message from Resend for better debugging
+      const errorMessage = error.message || 'Unknown error occurred';
       return NextResponse.json(
-        { error: 'Failed to send email' },
+        { error: `Failed to send email: ${errorMessage}` },
         { status: 500 }
       );
     }
+
+    console.log(`✅ Email sent successfully! ID: ${data?.id}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     return NextResponse.json({ 
       success: true, 
@@ -111,9 +137,9 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Send report error:', error);
+    console.error('❌ Send report error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }

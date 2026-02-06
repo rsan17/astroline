@@ -18,6 +18,7 @@ export function ShareSection({ reportId, email, sunSign, moonSign, risingSign, i
   const [isCopied, setIsCopied] = useState(false);
   const [isEmailSending, setIsEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   const shareUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}/report/${reportId}` 
@@ -38,7 +39,16 @@ export function ShareSection({ reportId, email, sunSign, moonSign, risingSign, i
   const handleSendEmail = async () => {
     if (!email) return;
     
+    // Validate email format before sending
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError('Будь ласка, введіть коректну email адресу');
+      return;
+    }
+    
     setIsEmailSending(true);
+    setEmailError(null);
+    
     try {
       const response = await fetch('/api/send-report', {
         method: 'POST',
@@ -46,11 +56,29 @@ export function ShareSection({ reportId, email, sunSign, moonSign, risingSign, i
         body: JSON.stringify({ email, reportId, sunSign, moonSign, risingSign }),
       });
       
-      if (response.ok) {
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
         setEmailSent(true);
+      } else {
+        // Improve error message handling for Resend domain verification errors
+        let errorMessage = result.error || 'Не вдалося надіслати email';
+        
+        // Check for Resend domain verification error
+        if (errorMessage.includes('You can only send testing emails to your own email address')) {
+          errorMessage = 'На жаль, наразі можна надсилати email лише на адресу власника акаунта. Для відправки на інші адреси потрібно верифікувати домен у Resend.';
+        } else if (errorMessage.includes('domain') || errorMessage.includes('verify')) {
+          errorMessage = 'Помилка конфігурації email сервісу. Будь ласка, зверніться до підтримки.';
+        } else if (errorMessage.includes('Failed to send email')) {
+          errorMessage = 'Не вдалося надіслати email. Перевірте правильність адреси та спробуйте ще раз.';
+        }
+        
+        setEmailError(errorMessage);
+        console.error('Email send failed:', result.error);
       }
     } catch (err) {
       console.error('Failed to send email:', err);
+      setEmailError('Помилка мережі. Перевірте підключення до інтернету та спробуйте ще раз.');
     } finally {
       setIsEmailSending(false);
     }
@@ -149,6 +177,16 @@ export function ShareSection({ reportId, email, sunSign, moonSign, risingSign, i
                   className="text-sm text-green-400 mt-3"
                 >
                   ✓ Звіт надіслано на вашу пошту!
+                </motion.p>
+              )}
+              
+              {emailError && (
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm text-red-400 mt-3"
+                >
+                  ✕ {emailError}
                 </motion.p>
               )}
             </div>
