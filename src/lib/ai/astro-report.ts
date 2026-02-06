@@ -284,7 +284,7 @@ async function generateAIContent(
         model: groq('llama-3.3-70b-versatile'),
         prompt,
         temperature: 0.7,
-        maxOutputTokens: 8192,
+        maxOutputTokens: 16384,
       });
 
       const parsed = parseAIResponse(text);
@@ -303,10 +303,10 @@ async function generateAIContent(
   if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     try {
       const { text } = await generateText({
-        model: google('gemini-1.5-flash'),
+        model: google('gemini-2.0-flash'),
         prompt,
         temperature: 0.7,
-        maxOutputTokens: 8192,
+        maxOutputTokens: 16384,
       });
 
       const parsed = parseAIResponse(text);
