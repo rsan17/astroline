@@ -284,7 +284,7 @@ async function generateAIContent(
         model: groq('llama-3.3-70b-versatile'),
         prompt,
         temperature: 0.7,
-        maxTokens: 8192,
+        maxOutputTokens: 8192,
       });
 
       const parsed = parseAIResponse(text);
@@ -306,7 +306,7 @@ async function generateAIContent(
         model: google('gemini-1.5-flash'),
         prompt,
         temperature: 0.7,
-        maxTokens: 8192,
+        maxOutputTokens: 8192,
       });
 
       const parsed = parseAIResponse(text);
