@@ -31,10 +31,8 @@ export interface QuizData {
   modality?: string;
   polarity?: string;
   
-  // Step 9: Palm image
+  // Palm data (temporarily disabled - kept for future use)
   palmImageUrl?: string;
-  
-  // Step 10: Palm reading results
   palmReading?: {
     childrenCount: string;
     marriagesCount: string;
@@ -47,7 +45,7 @@ export interface QuizData {
 }
 
 interface QuizState {
-  // Current step (1-13)
+  // Current step (1-12) - Palm step temporarily disabled
   currentStep: number;
   
   // Quiz data
@@ -71,7 +69,7 @@ interface QuizState {
   reset: () => void;
 }
 
-const TOTAL_STEPS = 13;
+const TOTAL_STEPS = 12; // Palm step temporarily disabled (was 13)
 
 const initialData: QuizData = {};
 
@@ -134,10 +132,10 @@ export const useQuizStore = create<QuizState>()(
     }),
     {
       name: 'astroline-quiz',
-      version: 2, // Increment this to clear old localStorage data on deploy
+      version: 3, // v3: Palm step disabled, quiz now has 12 steps instead of 13
       migrate: (persistedState, version) => {
         // Clear old data when version changes (users will restart quiz)
-        if (version < 2) {
+        if (version < 3) {
           return {
             currentStep: 1,
             data: {},

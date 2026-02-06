@@ -13,7 +13,11 @@ export async function GET(request: NextRequest) {
   console.log(`🔗 Reference: ${reference}`);
 
   // Get base URL for redirect
-  const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  // Priority: NEXT_PUBLIC_BASE_URL > request URL origin
+  const requestOrigin = request.nextUrl.origin;
+  const origin = process.env.NEXT_PUBLIC_BASE_URL || requestOrigin;
+  
+  console.log(`🌐 Redirect origin: ${origin}`);
 
   if (!reportId) {
     console.log('❌ Missing reportId, redirecting to home');

@@ -11,12 +11,12 @@ interface QuizProgressProps {
   className?: string;
 }
 
+// STEP_GROUPS updated for 12 steps (Palm step disabled)
 const STEP_GROUPS = [
   { start: 1, end: 4, label: 'About You' },
   { start: 5, end: 8, label: 'Preferences' },
   { start: 9, end: 10, label: 'Analysis' },
-  { start: 11, end: 13, label: 'Palm' },
-  { start: 14, end: 14, label: 'Results' },
+  { start: 11, end: 12, label: 'Results' },
 ];
 
 export function QuizProgress({ showBack = true, className }: QuizProgressProps) {

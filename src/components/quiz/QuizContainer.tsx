@@ -14,7 +14,8 @@ import { ColorStep } from './steps/ColorStep';
 import { ElementStep } from './steps/ElementStep';
 import { CalculatingStep } from './steps/CalculatingStep';
 import { AstroResultStep } from './steps/AstroResultStep';
-import { PalmUploadStep } from './steps/PalmUploadStep';
+// PalmUploadStep temporarily disabled - uncomment when palm analysis is fixed
+// import { PalmUploadStep } from './steps/PalmUploadStep';
 import { EmailStep } from './steps/EmailStep';
 import { PaywallStep } from './steps/PaywallStep';
 
@@ -29,9 +30,9 @@ const stepComponents: Record<number, React.ComponentType> = {
   8: ElementStep,
   9: CalculatingStep,
   10: AstroResultStep,
-  11: PalmUploadStep,
-  12: EmailStep,
-  13: PaywallStep,
+  // 11: PalmUploadStep, // Temporarily disabled - palm analysis not working
+  11: EmailStep,
+  12: PaywallStep,
 };
 
 export function QuizContainer() {

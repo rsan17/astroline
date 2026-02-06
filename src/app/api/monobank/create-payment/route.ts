@@ -25,7 +25,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Get base URL for redirects
-    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    // Priority: NEXT_PUBLIC_BASE_URL > request URL origin > localhost (only for dev)
+    const requestOrigin = request.nextUrl.origin;
+    const isLocalhost = requestOrigin.includes('localhost');
+    const origin = process.env.NEXT_PUBLIC_BASE_URL || (isLocalhost ? requestOrigin : requestOrigin);
+    
+    console.log(`🌐 Redirect origin: ${origin} (from: ${requestOrigin})`);
     
     // Create unique reference for this payment
     const reference = `ASTRO-${reportId}-${Date.now()}`;

@@ -1,12 +1,13 @@
 // AI-powered astrology report generation with Groq (primary) and Gemini (fallback)
+// Extended for comprehensive PDF report generation
 
 import { generateText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { google } from '@ai-sdk/google';
 import { buildAstroReportPrompt, type UserDataForPrompt, type ZodiacVerificationResult } from './prompts';
 import { generateReport as generateStaticReport, zodiacSigns } from '../report-data';
-import { ZODIAC_SIGNS, getZodiacBySlug } from '../constants/zodiac';
-import type { FullReport } from '@/types/report';
+import { ZODIAC_SIGNS } from '../constants/zodiac';
+import type { FullReport, HiddenTalent } from '@/types/report';
 
 // Create Groq client using OpenAI-compatible API
 const groq = createOpenAI({
@@ -141,7 +142,6 @@ function verifyAstrologicalProperties(signName: string): AstrologicalPropertiesR
   // Verify element matches sign
   const expectedElement = sign.element;
   const expectedModality = sign.modality;
-  const expectedRulingPlanet = sign.rulingPlanetUk;
 
   // Get sign data from report-data for comparison
   const reportSign = zodiacSigns[signName];
@@ -183,42 +183,65 @@ function verifyAstrologicalProperties(signName: string): AstrologicalPropertiesR
 // AI provider type
 export type AIProvider = 'groq' | 'gemini' | 'static';
 
-// AI-generated content structure (extended for enhanced prompt)
+// Extended AI-generated content structure for comprehensive PDF
 interface AIGeneratedContent {
-  personalIntro?: string;
-  sunDescription: string;
-  moonDescription: string;
-  risingDescription: string;
-  signsSynergy?: string;
-  personalityOverview: string;
-  hiddenTalents: string[];
-  lifeLesson: string;
-  elementAnalysis?: string;
-  colorMeaning?: string;
+  natalChart: {
+    sunDescription: string;
+    sunDescriptionExtended?: string[];
+    moonDescription: string;
+    moonDescriptionExtended?: string[];
+    risingDescription: string;
+    risingDescriptionExtended?: string[];
+    signsSynergy?: string;
+  };
+  numerology?: {
+    lifePathSubtitle?: string;
+    lifePathMeaning: string;
+    lifePathMeaningExtended?: string[];
+    birthdaySubtitle?: string;
+    birthdayMeaning: string;
+    birthdayMeaningExtended?: string[];
+    personalYearSubtitle?: string;
+    personalYearMeaning: string;
+    personalYearMeaningExtended?: string[];
+  };
+  personality: {
+    traits: Array<{title: string; description: string}>;
+    hiddenTalents: Array<{title: string; description: string; extendedDescription?: string}>;
+    lifeLesson: string;
+  };
   forecast2026: {
     overall: string;
     keyDates?: string[];
-    q1: { title: string; description: string; focus: string[]; advice: string; warning?: string };
-    q2: { title: string; description: string; focus: string[]; advice: string; warning?: string };
-    q3: { title: string; description: string; focus: string[]; advice: string; warning?: string };
-    q4: { title: string; description: string; focus: string[]; advice: string; warning?: string };
+    quarters: Array<{
+      quarter: string;
+      title: string;
+      careerForecast?: string;
+      financeForecast?: string;
+      relationshipsForecast?: string;
+      focus: string[];
+      advice?: string;
+      warning?: string;
+    }>;
   };
   love: {
     overview: string;
-    strengths: string[];
-    challenges: string[];
-    idealPartnerTraits: string[];
-    advice2026: string;
-    bestMonthsForLove: string[];
-    redFlags?: string[];
+    overviewExtended?: string;
+    strengthsDetailed?: Array<{title: string; description: string}>;
+    challengesDetailed?: Array<{title: string; description: string}>;
+    adviceItems?: Array<{title: string; description: string}>;
+    idealPartnerTraits?: string[];
+    bestMonthsForLove?: string[];
+    compatibility?: Array<{sign: string; percentage: number; whyItWorks?: string}>;
   };
   career: {
     overview: string;
-    strengths: string[];
-    idealCareers: string[];
-    financeTips: string[];
-    opportunities2026: string;
-    warningPeriods: string[];
+    strengthsDetailed?: Array<{title: string; description: string}>;
+    idealCareersDetailed?: Array<{title: string; description: string}>;
+    financeTipsDetailed?: Array<{title: string; description: string}>;
+    yearFocusItems?: Array<{title: string; description: string}>;
+    opportunities2026?: string;
+    warningPeriods?: string[];
     actionSteps?: string[];
   };
   lucky?: {
@@ -261,6 +284,7 @@ async function generateAIContent(
         model: groq('llama-3.3-70b-versatile'),
         prompt,
         temperature: 0.7,
+        maxTokens: 8192,
       });
 
       const parsed = parseAIResponse(text);
@@ -282,6 +306,7 @@ async function generateAIContent(
         model: google('gemini-1.5-flash'),
         prompt,
         temperature: 0.7,
+        maxTokens: 8192,
       });
 
       const parsed = parseAIResponse(text);
@@ -317,48 +342,46 @@ function parseAIResponse(text: string): AIGeneratedContent | null {
 
     const parsed = JSON.parse(cleanText);
     
-    // Enhanced validation of required fields
+    // Validate required fields for extended format
     const missingFields: string[] = [];
     
-    if (!parsed.sunDescription || typeof parsed.sunDescription !== 'string') {
-      missingFields.push('sunDescription');
+    // Check natalChart structure
+    if (!parsed.natalChart || typeof parsed.natalChart !== 'object') {
+      missingFields.push('natalChart');
+    } else {
+      if (!parsed.natalChart.sunDescription) missingFields.push('natalChart.sunDescription');
+      if (!parsed.natalChart.moonDescription) missingFields.push('natalChart.moonDescription');
+      if (!parsed.natalChart.risingDescription) missingFields.push('natalChart.risingDescription');
     }
-    if (!parsed.moonDescription || typeof parsed.moonDescription !== 'string') {
-      missingFields.push('moonDescription');
+
+    // Check personality structure
+    if (!parsed.personality || typeof parsed.personality !== 'object') {
+      missingFields.push('personality');
+    } else {
+      if (!Array.isArray(parsed.personality.traits)) missingFields.push('personality.traits');
+      if (!Array.isArray(parsed.personality.hiddenTalents)) missingFields.push('personality.hiddenTalents');
     }
-    if (!parsed.risingDescription || typeof parsed.risingDescription !== 'string') {
-      missingFields.push('risingDescription');
-    }
+
+    // Check forecast2026 structure
     if (!parsed.forecast2026 || typeof parsed.forecast2026 !== 'object') {
       missingFields.push('forecast2026');
     } else {
-      // Validate forecast structure
-      if (!parsed.forecast2026.overall || !parsed.forecast2026.q1 || !parsed.forecast2026.q2 || 
-          !parsed.forecast2026.q3 || !parsed.forecast2026.q4) {
-        missingFields.push('forecast2026 (incomplete structure)');
-      }
+      if (!parsed.forecast2026.overall) missingFields.push('forecast2026.overall');
+      if (!Array.isArray(parsed.forecast2026.quarters)) missingFields.push('forecast2026.quarters');
     }
+
+    // Check love structure
     if (!parsed.love || typeof parsed.love !== 'object') {
       missingFields.push('love');
     } else {
-      if (!parsed.love.overview || !Array.isArray(parsed.love.strengths) || 
-          !Array.isArray(parsed.love.challenges)) {
-        missingFields.push('love (incomplete structure)');
-      }
+      if (!parsed.love.overview) missingFields.push('love.overview');
     }
+
+    // Check career structure
     if (!parsed.career || typeof parsed.career !== 'object') {
       missingFields.push('career');
     } else {
-      if (!parsed.career.overview || !Array.isArray(parsed.career.strengths) || 
-          !Array.isArray(parsed.career.idealCareers)) {
-        missingFields.push('career (incomplete structure)');
-      }
-    }
-    if (!Array.isArray(parsed.hiddenTalents)) {
-      missingFields.push('hiddenTalents');
-    }
-    if (!parsed.lifeLesson || typeof parsed.lifeLesson !== 'string') {
-      missingFields.push('lifeLesson');
+      if (!parsed.career.overview) missingFields.push('career.overview');
     }
 
     if (missingFields.length > 0) {
@@ -477,67 +500,98 @@ export async function generateAstroReportWithAI(
   // Merge AI content with static structure
   console.log(`🚀 Using AI-enhanced report (provider: ${aiResult.provider})`);
   
+  // Create hidden talents from AI content
+  const hiddenTalents: HiddenTalent[] = aiContent.personality.hiddenTalents?.map(talent => ({
+    title: talent.title,
+    description: talent.description,
+    extendedDescription: talent.extendedDescription,
+  })) || [];
+
+  // Get zodiac symbols for compatibility
+  const getZodiacSymbol = (signName: string): string => {
+    const symbols: Record<string, string> = {
+      'Овен': '♈', 'Телець': '♉', 'Близнюки': '♊', 'Рак': '♋',
+      'Лев': '♌', 'Діва': '♍', 'Терези': '♎', 'Скорпіон': '♏',
+      'Стрілець': '♐', 'Козеріг': '♑', 'Водолій': '♒', 'Риби': '♓',
+    };
+    return symbols[signName] || '★';
+  };
+
   const enhancedReport: FullReport = {
     ...staticReport,
     natalChart: {
       ...staticReport.natalChart,
-      sunDescription: aiContent.sunDescription,
-      moonDescription: aiContent.moonDescription,
-      risingDescription: aiContent.risingDescription,
+      sunDescription: aiContent.natalChart.sunDescription,
+      sunDescriptionExtended: aiContent.natalChart.sunDescriptionExtended,
+      moonDescription: aiContent.natalChart.moonDescription,
+      moonDescriptionExtended: aiContent.natalChart.moonDescriptionExtended,
+      risingDescription: aiContent.natalChart.risingDescription,
+      risingDescriptionExtended: aiContent.natalChart.risingDescriptionExtended,
+      signsSynergy: aiContent.natalChart.signsSynergy,
     },
-    personality: [
-      ...staticReport.personality,
-      // Add AI-discovered hidden talents as traits
-      ...aiContent.hiddenTalents.slice(0, 2).map((talent, i) => ({
-        title: talent,
-        description: 'Прихований талант, виявлений через аналіз вашої натальної карти',
-        strength: 75 + i * 5,
-        icon: '✨',
-      })),
-    ],
-    forecast2026: [
-      {
-        quarter: 'Q1 2026',
-        title: aiContent.forecast2026.q1.title,
-        description: aiContent.forecast2026.q1.description,
-        focus: aiContent.forecast2026.q1.focus,
-        luckyDays: staticReport.forecast2026[0]?.luckyDays || [],
-      },
-      {
-        quarter: 'Q2 2026',
-        title: aiContent.forecast2026.q2.title,
-        description: aiContent.forecast2026.q2.description,
-        focus: aiContent.forecast2026.q2.focus,
-        luckyDays: staticReport.forecast2026[1]?.luckyDays || [],
-      },
-      {
-        quarter: 'Q3 2026',
-        title: aiContent.forecast2026.q3.title,
-        description: aiContent.forecast2026.q3.description,
-        focus: aiContent.forecast2026.q3.focus,
-        luckyDays: staticReport.forecast2026[2]?.luckyDays || [],
-      },
-      {
-        quarter: 'Q4 2026',
-        title: aiContent.forecast2026.q4.title,
-        description: aiContent.forecast2026.q4.description,
-        focus: aiContent.forecast2026.q4.focus,
-        luckyDays: staticReport.forecast2026[3]?.luckyDays || [],
-      },
-    ],
+    numerology: staticReport.numerology ? {
+      ...staticReport.numerology,
+      lifePathSubtitle: aiContent.numerology?.lifePathSubtitle,
+      lifePathMeaning: aiContent.numerology?.lifePathMeaning || staticReport.numerology.lifePathMeaning,
+      lifePathMeaningExtended: aiContent.numerology?.lifePathMeaningExtended,
+      birthdaySubtitle: aiContent.numerology?.birthdaySubtitle,
+      birthdayMeaning: aiContent.numerology?.birthdayMeaning || staticReport.numerology.birthdayMeaning,
+      birthdayMeaningExtended: aiContent.numerology?.birthdayMeaningExtended,
+      personalYearSubtitle: aiContent.numerology?.personalYearSubtitle,
+      personalYearMeaning: aiContent.numerology?.personalYearMeaning || staticReport.numerology.personalYearMeaning,
+      personalYearMeaningExtended: aiContent.numerology?.personalYearMeaningExtended,
+    } : undefined,
+    personality: aiContent.personality.traits?.map((trait, i) => ({
+      title: trait.title,
+      description: trait.description,
+      strength: 70 + Math.floor(Math.random() * 25), // 70-95%
+      icon: staticReport.personality[i]?.icon || '✨',
+    })) || staticReport.personality,
+    hiddenTalents,
+    forecast2026: aiContent.forecast2026.quarters?.map((q, i) => ({
+      quarter: q.quarter,
+      title: q.title,
+      description: q.careerForecast || '', // Keep for backward compat
+      focus: q.focus || [],
+      luckyDays: staticReport.forecast2026[i]?.luckyDays || [],
+      careerForecast: q.careerForecast,
+      financeForecast: q.financeForecast,
+      relationshipsForecast: q.relationshipsForecast,
+      advice: q.advice,
+      warning: q.warning,
+    })) || staticReport.forecast2026,
     love: {
       overview: aiContent.love.overview,
-      strengths: aiContent.love.strengths,
-      challenges: aiContent.love.challenges,
-      advice: aiContent.love.advice2026,
-      topMatches: staticReport.love.topMatches, // Keep static compatibility data
+      overviewExtended: aiContent.love.overviewExtended,
+      strengths: aiContent.love.strengthsDetailed?.map(s => s.title) || staticReport.love.strengths,
+      strengthsDetailed: aiContent.love.strengthsDetailed,
+      challenges: aiContent.love.challengesDetailed?.map(c => c.title) || staticReport.love.challenges,
+      challengesDetailed: aiContent.love.challengesDetailed,
+      advice: aiContent.love.adviceItems?.[0]?.description || staticReport.love.advice,
+      adviceItems: aiContent.love.adviceItems,
+      idealPartnerTraits: aiContent.love.idealPartnerTraits,
+      bestMonthsForLove: aiContent.love.bestMonthsForLove,
+      topMatches: aiContent.love.compatibility?.map(c => ({
+        sign: c.sign,
+        symbol: getZodiacSymbol(c.sign),
+        percentage: c.percentage,
+        description: staticReport.love.topMatches.find(m => m.sign === c.sign)?.description || '',
+        whyItWorks: c.whyItWorks,
+      })) || staticReport.love.topMatches,
     },
     career: {
       overview: aiContent.career.overview,
-      strengths: aiContent.career.strengths,
-      idealCareers: aiContent.career.idealCareers,
-      financeTips: aiContent.career.financeTips,
-      yearFocus: aiContent.career.opportunities2026,
+      strengths: aiContent.career.strengthsDetailed?.map(s => s.title) || staticReport.career.strengths,
+      strengthsDetailed: aiContent.career.strengthsDetailed,
+      idealCareers: aiContent.career.idealCareersDetailed?.map(c => c.title) || staticReport.career.idealCareers,
+      idealCareersDetailed: aiContent.career.idealCareersDetailed,
+      financeTips: aiContent.career.financeTipsDetailed?.map(t => t.title) || staticReport.career.financeTips,
+      financeTipsDetailed: aiContent.career.financeTipsDetailed,
+      yearFocus: aiContent.career.opportunities2026 || staticReport.career.yearFocus,
+      yearFocusItems: aiContent.career.yearFocusItems,
+      opportunities2026: aiContent.career.opportunities2026,
+      warningPeriods: aiContent.career.warningPeriods,
+      actionSteps: aiContent.career.actionSteps,
     },
     // Merge AI-generated lucky attributes if available
     lucky: aiContent.lucky ? {
