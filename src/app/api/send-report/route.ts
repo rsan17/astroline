@@ -62,6 +62,18 @@ export async function POST(request: NextRequest) {
       const fullReport = await getReport(reportId);
       
       if (fullReport) {
+        // Verify report has extended fields before generating PDF
+        const hasExtendedFields = !!(
+          fullReport.natalChart?.sunDescriptionExtended ||
+          fullReport.natalChart?.moonDescriptionExtended ||
+          fullReport.natalChart?.risingDescriptionExtended
+        );
+        console.log(`📊 PDF Report verification:`);
+        console.log(`   - Has extended fields: ${hasExtendedFields}`);
+        console.log(`   - sunDescriptionExtended: ${fullReport.natalChart?.sunDescriptionExtended?.length || 0} items`);
+        console.log(`   - sunDescription length: ${fullReport.natalChart?.sunDescription?.length || 0} chars`);
+        console.log(`   - Provider info: ${(fullReport as any).provider || 'unknown'}`);
+        
         console.log('📄 Generating PDF...');
         // Generate PDF from report data
         pdfBuffer = await generatePdfBuffer(fullReport);

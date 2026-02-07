@@ -25,6 +25,21 @@ export async function GET(
       );
     }
 
+    // Log report structure for verification
+    const hasExtendedFields = !!(
+      report.natalChart?.sunDescriptionExtended ||
+      report.natalChart?.moonDescriptionExtended ||
+      report.natalChart?.risingDescriptionExtended
+    );
+    console.log(`📊 API GET /api/report/${reportId} - Report structure:`);
+    console.log(`   - Has extended fields: ${hasExtendedFields}`);
+    console.log(`   - sunDescription length: ${report.natalChart?.sunDescription?.length || 0} chars`);
+    console.log(`   - sunDescriptionExtended: ${report.natalChart?.sunDescriptionExtended?.length || 0} paragraphs`);
+    console.log(`   - moonDescriptionExtended: ${report.natalChart?.moonDescriptionExtended?.length || 0} paragraphs`);
+    console.log(`   - risingDescriptionExtended: ${report.natalChart?.risingDescriptionExtended?.length || 0} paragraphs`);
+    console.log(`   - love.overviewExtended: ${report.love?.overviewExtended ? 'present' : 'missing'}`);
+    console.log(`   - career.opportunities2026: ${report.career?.opportunities2026 ? 'present' : 'missing'}`);
+
     return NextResponse.json({
       success: true,
       report,

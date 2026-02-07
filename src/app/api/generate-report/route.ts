@@ -86,6 +86,21 @@ export async function POST(request: NextRequest) {
     };
     console.log(`✅ Report generated using: ${providerLabels[provider]}`);
 
+    // Log report summary before saving
+    const hasExtendedFields = !!(
+      report.natalChart?.sunDescriptionExtended ||
+      report.natalChart?.moonDescriptionExtended ||
+      report.natalChart?.risingDescriptionExtended
+    );
+    console.log(`📊 Generated report summary:`);
+    console.log(`   - Provider: ${provider}`);
+    console.log(`   - Has extended fields: ${hasExtendedFields}`);
+    console.log(`   - sunDescription length: ${report.natalChart?.sunDescription?.length || 0} chars`);
+    console.log(`   - sunDescriptionExtended: ${report.natalChart?.sunDescriptionExtended?.length || 0} paragraphs`);
+    console.log(`   - moonDescriptionExtended: ${report.natalChart?.moonDescriptionExtended?.length || 0} paragraphs`);
+    console.log(`   - love.overviewExtended: ${report.love?.overviewExtended ? 'present' : 'missing'}`);
+    console.log(`   - career.opportunities2026: ${report.career?.opportunities2026 ? 'present' : 'missing'}`);
+
     // Save report to database (Supabase)
     const dbResult = await saveReport(reportId, email, report);
     if (dbResult.success) {

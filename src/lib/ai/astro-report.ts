@@ -283,13 +283,15 @@ async function generateAIContent(
       const { text } = await generateText({
         model: groq('llama-3.3-70b-versatile'),
         prompt,
-        temperature: 0.7,
-        maxOutputTokens: 16384,
+        temperature: 0.8, // Slightly higher for more creative, longer responses
+        maxOutputTokens: 32768, // Increased to maximum for comprehensive reports
       });
 
       const parsed = parseAIResponse(text);
       if (parsed) {
         console.log('✅ Successfully generated AI content with Groq (LLaMA 3.3)');
+        // Log field lengths for debugging
+        console.log(`📊 Content lengths: sunDesc=${parsed.natalChart.sunDescription?.length || 0}, sunExt=${parsed.natalChart.sunDescriptionExtended?.length || 0}, moonDesc=${parsed.natalChart.moonDescription?.length || 0}, moonExt=${parsed.natalChart.moonDescriptionExtended?.length || 0}`);
         return { content: parsed, provider: 'groq' };
       }
       // If parsing failed, try Gemini fallback
@@ -305,13 +307,15 @@ async function generateAIContent(
       const { text } = await generateText({
         model: google('gemini-2.0-flash'),
         prompt,
-        temperature: 0.7,
-        maxOutputTokens: 16384,
+        temperature: 0.8, // Slightly higher for more creative, longer responses
+        maxOutputTokens: 32768, // Increased to maximum for comprehensive reports
       });
 
       const parsed = parseAIResponse(text);
       if (parsed) {
         console.log('✅ Successfully generated AI content with Gemini 1.5 Flash');
+        // Log field lengths for debugging
+        console.log(`📊 Content lengths: sunDesc=${parsed.natalChart.sunDescription?.length || 0}, sunExt=${parsed.natalChart.sunDescriptionExtended?.length || 0}, moonDesc=${parsed.natalChart.moonDescription?.length || 0}, moonExt=${parsed.natalChart.moonDescriptionExtended?.length || 0}`);
         return { content: parsed, provider: 'gemini' };
       }
       console.warn('⚠️ Gemini response parsing failed');
@@ -350,16 +354,30 @@ function parseAIResponse(text: string): AIGeneratedContent | null {
       missingFields.push('natalChart');
     } else {
       if (!parsed.natalChart.sunDescription) missingFields.push('natalChart.sunDescription');
+      if (!Array.isArray(parsed.natalChart.sunDescriptionExtended) || parsed.natalChart.sunDescriptionExtended.length < 3) {
+        missingFields.push('natalChart.sunDescriptionExtended (required: 3 paragraphs)');
+      }
       if (!parsed.natalChart.moonDescription) missingFields.push('natalChart.moonDescription');
+      if (!Array.isArray(parsed.natalChart.moonDescriptionExtended) || parsed.natalChart.moonDescriptionExtended.length < 3) {
+        missingFields.push('natalChart.moonDescriptionExtended (required: 3 paragraphs)');
+      }
       if (!parsed.natalChart.risingDescription) missingFields.push('natalChart.risingDescription');
+      if (!Array.isArray(parsed.natalChart.risingDescriptionExtended) || parsed.natalChart.risingDescriptionExtended.length < 3) {
+        missingFields.push('natalChart.risingDescriptionExtended (required: 3 paragraphs)');
+      }
     }
 
     // Check personality structure
     if (!parsed.personality || typeof parsed.personality !== 'object') {
       missingFields.push('personality');
     } else {
-      if (!Array.isArray(parsed.personality.traits)) missingFields.push('personality.traits');
-      if (!Array.isArray(parsed.personality.hiddenTalents)) missingFields.push('personality.hiddenTalents');
+      if (!Array.isArray(parsed.personality.traits) || parsed.personality.traits.length < 6) {
+        missingFields.push('personality.traits (required: 6 items)');
+      }
+      if (!Array.isArray(parsed.personality.hiddenTalents) || parsed.personality.hiddenTalents.length < 2) {
+        missingFields.push('personality.hiddenTalents (required: 2 items)');
+      }
+      if (!parsed.personality.lifeLesson) missingFields.push('personality.lifeLesson');
     }
 
     // Check forecast2026 structure
@@ -367,7 +385,16 @@ function parseAIResponse(text: string): AIGeneratedContent | null {
       missingFields.push('forecast2026');
     } else {
       if (!parsed.forecast2026.overall) missingFields.push('forecast2026.overall');
-      if (!Array.isArray(parsed.forecast2026.quarters)) missingFields.push('forecast2026.quarters');
+      if (!Array.isArray(parsed.forecast2026.quarters) || parsed.forecast2026.quarters.length < 4) {
+        missingFields.push('forecast2026.quarters (required: 4 quarters)');
+      } else {
+        // Validate each quarter has required fields
+        parsed.forecast2026.quarters.forEach((q: any, i: number) => {
+          if (!q.careerForecast) missingFields.push(`forecast2026.quarters[${i}].careerForecast`);
+          if (!q.financeForecast) missingFields.push(`forecast2026.quarters[${i}].financeForecast`);
+          if (!q.relationshipsForecast) missingFields.push(`forecast2026.quarters[${i}].relationshipsForecast`);
+        });
+      }
     }
 
     // Check love structure
@@ -375,6 +402,16 @@ function parseAIResponse(text: string): AIGeneratedContent | null {
       missingFields.push('love');
     } else {
       if (!parsed.love.overview) missingFields.push('love.overview');
+      if (!parsed.love.overviewExtended) missingFields.push('love.overviewExtended');
+      if (!Array.isArray(parsed.love.strengthsDetailed) || parsed.love.strengthsDetailed.length < 4) {
+        missingFields.push('love.strengthsDetailed (required: 4 items)');
+      }
+      if (!Array.isArray(parsed.love.challengesDetailed) || parsed.love.challengesDetailed.length < 4) {
+        missingFields.push('love.challengesDetailed (required: 4 items)');
+      }
+      if (!Array.isArray(parsed.love.adviceItems) || parsed.love.adviceItems.length < 4) {
+        missingFields.push('love.adviceItems (required: 4 items)');
+      }
     }
 
     // Check career structure
@@ -382,10 +419,34 @@ function parseAIResponse(text: string): AIGeneratedContent | null {
       missingFields.push('career');
     } else {
       if (!parsed.career.overview) missingFields.push('career.overview');
+      if (!Array.isArray(parsed.career.strengthsDetailed) || parsed.career.strengthsDetailed.length < 4) {
+        missingFields.push('career.strengthsDetailed (required: 4 items)');
+      }
+      if (!Array.isArray(parsed.career.idealCareersDetailed) || parsed.career.idealCareersDetailed.length < 5) {
+        missingFields.push('career.idealCareersDetailed (required: 5 items)');
+      }
+      if (!Array.isArray(parsed.career.financeTipsDetailed) || parsed.career.financeTipsDetailed.length < 6) {
+        missingFields.push('career.financeTipsDetailed (required: 6 items)');
+      }
+      if (!parsed.career.opportunities2026) missingFields.push('career.opportunities2026');
+    }
+
+    // Also validate numerology extended fields
+    if (parsed.numerology) {
+      if (!parsed.numerology.lifePathMeaningExtended || !Array.isArray(parsed.numerology.lifePathMeaningExtended) || parsed.numerology.lifePathMeaningExtended.length < 2) {
+        missingFields.push('numerology.lifePathMeaningExtended (required: 2 paragraphs)');
+      }
+      if (!parsed.numerology.birthdayMeaningExtended || !Array.isArray(parsed.numerology.birthdayMeaningExtended) || parsed.numerology.birthdayMeaningExtended.length < 2) {
+        missingFields.push('numerology.birthdayMeaningExtended (required: 2 paragraphs)');
+      }
+      if (!parsed.numerology.personalYearMeaningExtended || !Array.isArray(parsed.numerology.personalYearMeaningExtended) || parsed.numerology.personalYearMeaningExtended.length < 2) {
+        missingFields.push('numerology.personalYearMeaningExtended (required: 2 paragraphs)');
+      }
     }
 
     if (missingFields.length > 0) {
-      console.warn('AI response missing or invalid required fields:', missingFields.join(', '));
+      console.warn('❌ AI response missing or invalid required fields:', missingFields.join(', '));
+      console.warn('⚠️ This will cause the system to use static template instead of AI-generated content');
       return null;
     }
 

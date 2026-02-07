@@ -31,6 +31,21 @@ export async function saveReport(
       is_paid: reportData.isPaid || false,
     };
 
+    // Log report structure for verification
+    const hasExtendedFields = !!(
+      reportData.natalChart?.sunDescriptionExtended ||
+      reportData.natalChart?.moonDescriptionExtended ||
+      reportData.natalChart?.risingDescriptionExtended
+    );
+    console.log(`📊 Report structure check:`);
+    console.log(`   - Has extended fields: ${hasExtendedFields}`);
+    console.log(`   - sunDescriptionExtended: ${reportData.natalChart?.sunDescriptionExtended?.length || 0} items`);
+    console.log(`   - moonDescriptionExtended: ${reportData.natalChart?.moonDescriptionExtended?.length || 0} items`);
+    console.log(`   - risingDescriptionExtended: ${reportData.natalChart?.risingDescriptionExtended?.length || 0} items`);
+    console.log(`   - sunDescription length: ${reportData.natalChart?.sunDescription?.length || 0} chars`);
+    console.log(`   - love.overviewExtended: ${reportData.love?.overviewExtended ? 'present' : 'missing'}`);
+    console.log(`   - career.opportunities2026: ${reportData.career?.opportunities2026 ? 'present' : 'missing'}`);
+
     const { error } = await supabaseAdmin
       .from('reports')
       .upsert(reportRecord, { onConflict: 'id' });
@@ -75,7 +90,18 @@ export async function getReport(reportId: string): Promise<FullReport | null> {
     }
 
     const report = data as Report;
-    return report.report_data;
+    const reportData = report.report_data;
+    
+    // Log loaded report structure for verification
+    console.log(`📊 Loaded report structure check:`);
+    console.log(`   - sunDescriptionExtended: ${reportData.natalChart?.sunDescriptionExtended?.length || 0} items`);
+    console.log(`   - moonDescriptionExtended: ${reportData.natalChart?.moonDescriptionExtended?.length || 0} items`);
+    console.log(`   - risingDescriptionExtended: ${reportData.natalChart?.risingDescriptionExtended?.length || 0} items`);
+    console.log(`   - sunDescription length: ${reportData.natalChart?.sunDescription?.length || 0} chars`);
+    console.log(`   - love.overviewExtended: ${reportData.love?.overviewExtended ? 'present' : 'missing'}`);
+    console.log(`   - career.opportunities2026: ${reportData.career?.opportunities2026 ? 'present' : 'missing'}`);
+    
+    return reportData;
   } catch (err) {
     console.error('❌ Exception fetching report:', err);
     return null;
